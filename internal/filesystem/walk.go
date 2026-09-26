@@ -53,6 +53,7 @@ type TreeNode struct {
 
 // Walk traverses directory hierarchy starting at root, invoking fn for each entry.
 func Walk(root string, opts WalkOptions, fn func(path string, entry *Entry, depth int) error) error {
+	root = filepath.Clean(root)
 	fi, err := os.Lstat(root)
 	if err != nil {
 		if opts.OnError != nil {
@@ -61,7 +62,7 @@ func Walk(root string, opts WalkOptions, fn func(path string, entry *Entry, dept
 		return fmt.Errorf("stat %q: %w", root, err)
 	}
 
-	rootEntry := buildEntry(filepath.Dir(root), fi.Name(), fi, opts.NeedDetails)
+	rootEntry := buildEntry(filepath.Dir(root), filepath.Base(root), fi, opts.NeedDetails)
 	if opts.DirsOnly && !rootEntry.IsDir {
 		return nil
 	}
@@ -145,12 +146,13 @@ func walkRecursive(dirPath string, depth int, opts WalkOptions, visited map[stri
 
 // BuildTree constructs a hierarchical TreeNode rooted at targetPath with aggregated counts and sizes.
 func BuildTree(root string, opts WalkOptions) (*TreeNode, error) {
+	root = filepath.Clean(root)
 	fi, err := os.Lstat(root)
 	if err != nil {
 		return nil, fmt.Errorf("stat %q: %w", root, err)
 	}
 
-	rootEntry := buildEntry(filepath.Dir(root), fi.Name(), fi, opts.NeedDetails)
+	rootEntry := buildEntry(filepath.Dir(root), filepath.Base(root), fi, opts.NeedDetails)
 	node := &TreeNode{
 		Entry:     rootEntry,
 		Depth:     0,
