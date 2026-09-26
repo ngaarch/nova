@@ -11,6 +11,7 @@ import (
 	"nova/internal/commands/cp"
 	"nova/internal/commands/du"
 	"nova/internal/commands/find"
+	"nova/internal/commands/interactive"
 	"nova/internal/commands/ls"
 	"nova/internal/commands/mkdir"
 	"nova/internal/commands/mv"
@@ -49,13 +50,7 @@ func (a *App) registerRoadmapCommands() {
 		mv.Command(),
 		rm.Command(),
 		mkdir.Command(),
-		{
-			Name:    "interactive",
-			Aliases: []string{"ui", "tui"},
-			Summary: "Interactive terminal file navigator and previewer",
-			Phase:   7,
-			Run:     nil, // Scheduled for Phase 7
-		},
+		interactive.Command(),
 	}
 }
 
@@ -229,6 +224,13 @@ func (a *App) Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int 
 
 	// Handle global --help or no arguments
 	if flags.help || len(flags.remainArgs) == 0 {
+		if !flags.help && len(flags.remainArgs) == 0 && caps.IsTTY && !flags.plain && !flags.json {
+			if err := interactive.Run(ctx, []string{}); err != nil {
+				ctx.Printer.Errorf("nova: interactive error: %v", err)
+				return ExitFailure
+			}
+			return ExitSuccess
+		}
 		if err := PrintHelp(ctx, a.commands); err != nil {
 			ctx.Printer.Errorf("nova: error rendering help: %v", err)
 			return ExitFailure

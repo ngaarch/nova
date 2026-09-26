@@ -87,20 +87,30 @@ func TestAppUnknownCommand(t *testing.T) {
 	}
 }
 
-func TestAppUnimplementedCommand(t *testing.T) {
+func TestAppInteractiveNonTTY(t *testing.T) {
 	app := NewApp()
 	var stdout, stderr bytes.Buffer
 	code := app.Run([]string{"interactive"}, strings.NewReader(""), &stdout, &stderr)
 
 	if code != ExitFailure {
-		t.Fatalf("expected ExitFailure (1) for unimplemented command, got %d", code)
+		t.Fatalf("expected ExitFailure (1) for interactive mode in non-TTY, got %d", code)
 	}
 	errStr := stdout.String() + stderr.String()
-	if !strings.Contains(errStr, "command \"interactive\" is not implemented yet") {
-		t.Errorf("expected explicit unimplemented message, got: %s", errStr)
+	if !strings.Contains(errStr, "requires a controlling terminal TTY") {
+		t.Errorf("expected TTY requirement error, got: %s", errStr)
 	}
-	if !strings.Contains(errStr, "Phase 7") {
-		t.Errorf("expected roadmap Phase 7 mention, got: %s", errStr)
+}
+
+func TestAppInteractiveHelp(t *testing.T) {
+	app := NewApp()
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"interactive", "--help"}, strings.NewReader(""), &stdout, &stderr)
+
+	if code != ExitSuccess {
+		t.Fatalf("expected ExitSuccess (0) for interactive --help, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "nova interactive") {
+		t.Errorf("expected usage in stdout, got: %s", stdout.String())
 	}
 }
 
