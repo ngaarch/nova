@@ -55,6 +55,7 @@ type MkdirOptions struct {
 	Parents bool
 	Mode    os.FileMode
 	Verbose bool
+	DryRun  bool
 }
 
 // CopyFile copies a single file or symlink from src to dst.
@@ -339,6 +340,10 @@ func MakeDir(path string, opts MkdirOptions) error {
 	mode := opts.Mode
 	if mode == 0 {
 		mode = 0755
+	}
+
+	if opts.DryRun {
+		return nil
 	}
 
 	if opts.Parents {
