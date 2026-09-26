@@ -218,8 +218,25 @@ func CopyDir(src, dst string, opts CopyOptions) error {
 
 // Move moves a file or directory from src to dst.
 func Move(src, dst string, opts MoveOptions) error {
-	if _, err := os.Lstat(src); err != nil {
+	srcFi, err := os.Lstat(src)
+	if err != nil {
 		return fmt.Errorf("cannot stat %q: %w", src, err)
+	}
+
+	// Guard against moving a directory inside itself
+	if srcFi.IsDir() {
+		absSrc, err := filepath.Abs(src)
+		if err != nil {
+			return err
+		}
+		absDst, err := filepath.Abs(dst)
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(absSrc, absDst)
+		if err == nil && !strings.HasPrefix(rel, "..") && rel != "." {
+			return ErrDestInsideSource
+		}
 	}
 
 	if _, err := os.Lstat(dst); err == nil {
@@ -239,7 +256,7 @@ func Move(src, dst string, opts MoveOptions) error {
 	}
 
 	// First try atomic rename
-	err := os.Rename(src, dst)
+	err = os.Rename(src, dst)
 	if err == nil {
 		return nil
 	}
@@ -269,17 +286,26 @@ func Move(src, dst string, opts MoveOptions) error {
 	return fmt.Errorf("rename %q -> %q: %w", src, dst, err)
 }
 
+// ProtectRoot returns true if the specified path resolves to root, working dir, parent, or empty path.
+func ProtectRoot(path string) bool {
+	clean := filepath.Clean(path)
+	if clean == "/" || clean == "." || clean == ".." || clean == "" {
+		return true
+	}
+	abs, err := filepath.Abs(clean)
+	if err == nil && abs == "/" {
+		return true
+	}
+	return false
+}
+
 // Remove deletes a file, symlink, or directory.
 func Remove(path string, opts RemoveOptions) error {
 	cleanPath := filepath.Clean(path)
-	absPath, err := filepath.Abs(cleanPath)
-	if err != nil {
-		return err
-	}
 
 	// Root protection
 	if opts.ProtectRoot {
-		if absPath == "/" || cleanPath == "." || cleanPath == ".." || cleanPath == "" {
+		if ProtectRoot(cleanPath) {
 			return fmt.Errorf("%w: %q", ErrRootProtected, path)
 		}
 	}
