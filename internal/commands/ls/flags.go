@@ -90,6 +90,12 @@ func ParseFlags(args []string) Options {
 		} else if arg == "--no-icons" {
 			opts.Icons = "never"
 			i++
+		} else if arg == "--plain" || arg == "--json" || arg == "--debug" {
+			i++
+		} else if strings.HasPrefix(arg, "--color=") || strings.HasPrefix(arg, "--theme=") {
+			i++
+		} else if (arg == "--color" || arg == "--theme") && i+1 < len(args) {
+			i += 2
 		} else if strings.HasPrefix(arg, "-") && len(arg) > 1 && !strings.HasPrefix(arg, "--") {
 			// Handle bundled flags e.g. -lah or -alrt
 			for _, r := range arg[1:] {

@@ -25,6 +25,14 @@ func Command() *command.Command {
 
 // Run executes the ls command within the provided context and argument slice.
 func Run(ctx *command.Context, args []string) error {
+	for _, arg := range args {
+		if arg == "--plain" {
+			ctx.Printer.Mode = output.ModePlain
+		} else if arg == "--json" {
+			ctx.Printer.Mode = output.ModeJSON
+		}
+	}
+
 	opts := ParseFlags(args)
 
 	// Determine icon display policy
