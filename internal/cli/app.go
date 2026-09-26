@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"nova/internal/commands/ls"
 	"nova/internal/config"
 	"nova/internal/logging"
 	"nova/internal/output"
@@ -29,13 +30,7 @@ func NewApp() *App {
 // registerRoadmapCommands registers all planned v1 subcommands with their scheduled phases.
 func (a *App) registerRoadmapCommands() {
 	a.commands = []*Command{
-		{
-			Name:    "ls",
-			Aliases: []string{"list"},
-			Summary: "List directory contents with modern layout, colors, and icons",
-			Phase:   3,
-			Run:     nil, // Scheduled for Phase 3
-		},
+		ls.Command(),
 		{
 			Name:    "cat",
 			Aliases: []string{"view"},
