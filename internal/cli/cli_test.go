@@ -89,17 +89,30 @@ func TestAppUnknownCommand(t *testing.T) {
 func TestAppUnimplementedCommand(t *testing.T) {
 	app := NewApp()
 	var stdout, stderr bytes.Buffer
-	code := app.Run([]string{"cat"}, strings.NewReader(""), &stdout, &stderr)
+	code := app.Run([]string{"tree"}, strings.NewReader(""), &stdout, &stderr)
 
 	if code != ExitFailure {
 		t.Fatalf("expected ExitFailure (1) for unimplemented command, got %d", code)
 	}
 	errStr := stdout.String() + stderr.String()
-	if !strings.Contains(errStr, "command \"cat\" is not implemented yet") {
+	if !strings.Contains(errStr, "command \"tree\" is not implemented yet") {
 		t.Errorf("expected explicit unimplemented message, got: %s", errStr)
 	}
-	if !strings.Contains(errStr, "Phase 4") {
-		t.Errorf("expected roadmap Phase 4 mention, got: %s", errStr)
+	if !strings.Contains(errStr, "Phase 5") {
+		t.Errorf("expected roadmap Phase 5 mention, got: %s", errStr)
+	}
+}
+
+func TestAppExecuteCat(t *testing.T) {
+	app := NewApp()
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"cat", "--plain"}, strings.NewReader("hello from test\n"), &stdout, &stderr)
+
+	if code != ExitSuccess {
+		t.Fatalf("expected ExitSuccess (0) running cat, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "hello from test") {
+		t.Errorf("expected cat to stream stdin to stdout, got: %q", stdout.String())
 	}
 }
 

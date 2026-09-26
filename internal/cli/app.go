@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"nova/internal/commands/cat"
 	"nova/internal/commands/ls"
 	"nova/internal/config"
 	"nova/internal/logging"
@@ -31,13 +32,7 @@ func NewApp() *App {
 func (a *App) registerRoadmapCommands() {
 	a.commands = []*Command{
 		ls.Command(),
-		{
-			Name:    "cat",
-			Aliases: []string{"view"},
-			Summary: "Stream, view, and inspect files with syntax highlighting and paging",
-			Phase:   4,
-			Run:     nil, // Scheduled for Phase 4
-		},
+		cat.Command(),
 		{
 			Name:    "tree",
 			Summary: "Display directory hierarchy as a visual tree with metrics",
