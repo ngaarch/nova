@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
+	"os"
 	"strings"
 	"testing"
 )
@@ -89,17 +90,54 @@ func TestAppUnknownCommand(t *testing.T) {
 func TestAppUnimplementedCommand(t *testing.T) {
 	app := NewApp()
 	var stdout, stderr bytes.Buffer
-	code := app.Run([]string{"tree"}, strings.NewReader(""), &stdout, &stderr)
+	code := app.Run([]string{"cp"}, strings.NewReader(""), &stdout, &stderr)
 
 	if code != ExitFailure {
 		t.Fatalf("expected ExitFailure (1) for unimplemented command, got %d", code)
 	}
 	errStr := stdout.String() + stderr.String()
-	if !strings.Contains(errStr, "command \"tree\" is not implemented yet") {
+	if !strings.Contains(errStr, "command \"cp\" is not implemented yet") {
 		t.Errorf("expected explicit unimplemented message, got: %s", errStr)
 	}
-	if !strings.Contains(errStr, "Phase 5") {
-		t.Errorf("expected roadmap Phase 5 mention, got: %s", errStr)
+	if !strings.Contains(errStr, "Phase 6") {
+		t.Errorf("expected roadmap Phase 6 mention, got: %s", errStr)
+	}
+}
+
+func TestAppExecutePhase5Commands(t *testing.T) {
+	app := NewApp()
+	tmpDir := t.TempDir()
+	os.WriteFile(tmpDir+"/f.txt", []byte("data"), 0644)
+
+	// Test tree
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"tree", "--plain", tmpDir}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for tree, got %d; stderr: %s", code, stderr.String())
+	}
+
+	// Test find
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"find", tmpDir, "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for find, got %d; stderr: %s", code, stderr.String())
+	}
+
+	// Test stat
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"stat", "--plain", tmpDir + "/f.txt"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for stat, got %d; stderr: %s", code, stderr.String())
+	}
+
+	// Test du
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"du", "--plain", tmpDir}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for du, got %d; stderr: %s", code, stderr.String())
 	}
 }
 

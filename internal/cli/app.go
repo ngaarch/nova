@@ -8,7 +8,11 @@ import (
 	"strings"
 
 	"nova/internal/commands/cat"
+	"nova/internal/commands/du"
+	"nova/internal/commands/find"
 	"nova/internal/commands/ls"
+	"nova/internal/commands/stat"
+	"nova/internal/commands/tree"
 	"nova/internal/config"
 	"nova/internal/logging"
 	"nova/internal/output"
@@ -33,30 +37,10 @@ func (a *App) registerRoadmapCommands() {
 	a.commands = []*Command{
 		ls.Command(),
 		cat.Command(),
-		{
-			Name:    "tree",
-			Summary: "Display directory hierarchy as a visual tree with metrics",
-			Phase:   5,
-			Run:     nil, // Scheduled for Phase 5
-		},
-		{
-			Name:    "find",
-			Summary: "Search files across directories by predicates",
-			Phase:   5,
-			Run:     nil, // Scheduled for Phase 5
-		},
-		{
-			Name:    "stat",
-			Summary: "Display structured file status and filesystem metadata",
-			Phase:   5,
-			Run:     nil, // Scheduled for Phase 5
-		},
-		{
-			Name:    "du",
-			Summary: "Summarize disk usage by directories with human-readable units",
-			Phase:   5,
-			Run:     nil, // Scheduled for Phase 5
-		},
+		tree.Command(),
+		find.Command(),
+		stat.Command(),
+		du.Command(),
 		{
 			Name:    "cp",
 			Aliases: []string{"copy"},
