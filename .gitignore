@@ -1,0 +1,30 @@
+# Binaries
+/nova
+/nova.exe
+/radix
+/radix.exe
+/bin/
+/dist/
+*.exe
+*.test
+*.out
+
+# Go
+/vendor/
+
+# Profiling & coverage
+*.pprof
+cpu.prof
+mem.prof
+cover.out
+coverage.html
+
+# Test & scratch artifacts
+/tmp/
+*.tmp
+
+# Editor / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
