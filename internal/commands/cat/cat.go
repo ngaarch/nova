@@ -136,7 +136,7 @@ func viewTarget(ctx *command.Context, target string, opts Options) error {
 	}
 
 	// JSON pretty formatting if requested
-	if opts.FormatJSON || (lang == "json" && !opts.Plain && ctx.Printer.Mode == output.ModeHuman) {
+	if opts.FormatJSON || ctx.Printer.Mode == output.ModeJSON || (lang == "json" && !opts.Plain) {
 		allData, err := io.ReadAll(combinedReader)
 		if err == nil {
 			formatted, jErr := FormatJSONData(allData)
