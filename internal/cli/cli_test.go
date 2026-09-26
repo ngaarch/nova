@@ -90,17 +90,75 @@ func TestAppUnknownCommand(t *testing.T) {
 func TestAppUnimplementedCommand(t *testing.T) {
 	app := NewApp()
 	var stdout, stderr bytes.Buffer
-	code := app.Run([]string{"cp"}, strings.NewReader(""), &stdout, &stderr)
+	code := app.Run([]string{"interactive"}, strings.NewReader(""), &stdout, &stderr)
 
 	if code != ExitFailure {
 		t.Fatalf("expected ExitFailure (1) for unimplemented command, got %d", code)
 	}
 	errStr := stdout.String() + stderr.String()
-	if !strings.Contains(errStr, "command \"cp\" is not implemented yet") {
+	if !strings.Contains(errStr, "command \"interactive\" is not implemented yet") {
 		t.Errorf("expected explicit unimplemented message, got: %s", errStr)
 	}
-	if !strings.Contains(errStr, "Phase 6") {
-		t.Errorf("expected roadmap Phase 6 mention, got: %s", errStr)
+	if !strings.Contains(errStr, "Phase 7") {
+		t.Errorf("expected roadmap Phase 7 mention, got: %s", errStr)
+	}
+}
+
+func TestAppExecutePhase6Commands(t *testing.T) {
+	app := NewApp()
+	tmpDir := t.TempDir()
+
+	// 1. Test mkdir
+	var stdout, stderr bytes.Buffer
+	newDir := tmpDir + "/test_dir/nested"
+	code := app.Run([]string{"mkdir", "-p", newDir}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Fatalf("expected ExitSuccess for mkdir, got %d; stderr: %s", code, stderr.String())
+	}
+	if fi, err := os.Stat(newDir); err != nil || !fi.IsDir() {
+		t.Fatalf("mkdir failed to create directory: %v", err)
+	}
+
+	// 2. Test cp
+	srcFile := tmpDir + "/source.txt"
+	dstFile := tmpDir + "/dest.txt"
+	os.WriteFile(srcFile, []byte("phase 6 cp test data"), 0644)
+
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"cp", srcFile, dstFile}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Fatalf("expected ExitSuccess for cp, got %d; stderr: %s", code, stderr.String())
+	}
+	copiedData, err := os.ReadFile(dstFile)
+	if err != nil || string(copiedData) != "phase 6 cp test data" {
+		t.Fatalf("cp failed to copy file accurately: %v", err)
+	}
+
+	// 3. Test mv
+	movedFile := tmpDir + "/moved.txt"
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"mv", dstFile, movedFile}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Fatalf("expected ExitSuccess for mv, got %d; stderr: %s", code, stderr.String())
+	}
+	if _, err := os.Stat(dstFile); !os.IsNotExist(err) {
+		t.Fatalf("expected old dest file to not exist after mv")
+	}
+	if _, err := os.Stat(movedFile); err != nil {
+		t.Fatalf("expected moved file to exist: %v", err)
+	}
+
+	// 4. Test rm
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"rm", movedFile}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Fatalf("expected ExitSuccess for rm, got %d; stderr: %s", code, stderr.String())
+	}
+	if _, err := os.Stat(movedFile); !os.IsNotExist(err) {
+		t.Fatalf("expected moved file to be deleted")
 	}
 }
 

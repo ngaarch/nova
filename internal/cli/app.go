@@ -8,9 +8,13 @@ import (
 	"strings"
 
 	"nova/internal/commands/cat"
+	"nova/internal/commands/cp"
 	"nova/internal/commands/du"
 	"nova/internal/commands/find"
 	"nova/internal/commands/ls"
+	"nova/internal/commands/mkdir"
+	"nova/internal/commands/mv"
+	"nova/internal/commands/rm"
 	"nova/internal/commands/stat"
 	"nova/internal/commands/tree"
 	"nova/internal/config"
@@ -41,33 +45,10 @@ func (a *App) registerRoadmapCommands() {
 		find.Command(),
 		stat.Command(),
 		du.Command(),
-		{
-			Name:    "cp",
-			Aliases: []string{"copy"},
-			Summary: "Copy files and directories with progress, metadata preservation, and safety",
-			Phase:   6,
-			Run:     nil, // Scheduled for Phase 6
-		},
-		{
-			Name:    "mv",
-			Aliases: []string{"move"},
-			Summary: "Move and rename files and directories safely",
-			Phase:   6,
-			Run:     nil, // Scheduled for Phase 6
-		},
-		{
-			Name:    "rm",
-			Aliases: []string{"remove"},
-			Summary: "Safely delete files and directories with protection traps and dry-run",
-			Phase:   6,
-			Run:     nil, // Scheduled for Phase 6
-		},
-		{
-			Name:    "mkdir",
-			Summary: "Create directories with hierarchy support (-p)",
-			Phase:   6,
-			Run:     nil, // Scheduled for Phase 6
-		},
+		cp.Command(),
+		mv.Command(),
+		rm.Command(),
+		mkdir.Command(),
 		{
 			Name:    "interactive",
 			Aliases: []string{"ui", "tui"},
