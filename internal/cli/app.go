@@ -88,20 +88,37 @@ func parseGlobalFlags(args []string) parsedFlags {
 	var pf parsedFlags
 	var remain []string
 
+	// Find the first non-flag argument which represents the command name.
+	cmdIdx := -1
+	for i, arg := range args {
+		if !strings.HasPrefix(arg, "-") {
+			cmdIdx = i
+			break
+		}
+	}
+
 	i := 0
 	for i < len(args) {
 		arg := args[i]
-		if arg == "--help" || arg == "-h" {
+		isAfterCmd := cmdIdx != -1 && i > cmdIdx
+
+		if !isAfterCmd && (arg == "--help" || arg == "-h") {
 			pf.help = true
 			i++
-		} else if arg == "--version" || arg == "-v" {
+		} else if !isAfterCmd && (arg == "--version" || arg == "-v") {
 			pf.version = true
 			i++
 		} else if arg == "--plain" {
 			pf.plain = true
+			if isAfterCmd {
+				remain = append(remain, arg)
+			}
 			i++
 		} else if arg == "--json" {
 			pf.json = true
+			if isAfterCmd {
+				remain = append(remain, arg)
+			}
 			i++
 		} else if arg == "--debug" {
 			pf.debug = true
