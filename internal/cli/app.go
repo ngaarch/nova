@@ -11,6 +11,7 @@ import (
 	"nova/internal/logging"
 	"nova/internal/output"
 	"nova/internal/terminal"
+	"nova/internal/theme"
 )
 
 // App manages command registration, flag parsing, context configuration, and execution routing.
@@ -214,18 +215,32 @@ func (a *App) Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int 
 
 	// Resolve output mode: flags > config > TTY auto-detection
 	effectiveMode := output.ResolveMode(flags.plain, flags.json, caps.IsTTY)
-	if !flags.plain && !flags.json && cfg.OutputMode != "auto" {
-		switch cfg.OutputMode {
-		case "json":
-			effectiveMode = output.ModeJSON
-		case "plain":
-			effectiveMode = output.ModePlain
-		case "human":
+	if !flags.plain && !flags.json {
+		if flags.colorMode == "always" || cfg.ColorMode == "always" {
 			effectiveMode = output.ModeHuman
+		} else if cfg.OutputMode != "auto" {
+			switch cfg.OutputMode {
+			case "json":
+				effectiveMode = output.ModeJSON
+			case "plain":
+				effectiveMode = output.ModePlain
+			case "human":
+				effectiveMode = output.ModeHuman
+			}
 		}
 	}
 
-	ctx := NewContext(stdin, stdout, stderr, cfg, caps, effectiveMode, logger)
+	// Apply color overrides
+	if flags.colorMode == "never" || cfg.ColorMode == "never" {
+		caps.ColorProfile = terminal.ColorNone
+	} else if flags.colorMode == "always" || cfg.ColorMode == "always" {
+		if caps.ColorProfile == terminal.ColorNone {
+			caps.ColorProfile = terminal.Color256
+		}
+	}
+
+	th := theme.Get(cfg.Theme)
+	ctx := NewContext(stdin, stdout, stderr, cfg, caps, th, effectiveMode, logger)
 
 	// Handle global --version
 	if flags.version {
