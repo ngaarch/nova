@@ -20,15 +20,15 @@ func newTestContext(stdin string, mode output.Mode, profile terminal.ColorProfil
 	in.WriteString(stdin)
 	var stdout, stderr bytes.Buffer
 
-	cfg := config.DefaultConfig()
+	cfg := config.Default()
 	caps := terminal.Capabilities{
 		IsTTY:        mode == output.ModeHuman,
 		Width:        80,
 		Height:       24,
 		ColorProfile: profile,
 	}
-	th := theme.ThemeDefault
-	logger := logging.NewLogger(&stderr, false)
+	th := theme.Get("default")
+	logger := logging.New(&stderr, false)
 
 	ctx := command.NewContext(&in, &stdout, &stderr, cfg, caps, th, mode, logger)
 	return ctx, &stdout, &stderr

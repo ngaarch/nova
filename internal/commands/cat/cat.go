@@ -93,6 +93,11 @@ func viewTarget(ctx *command.Context, target string, opts Options) error {
 	// Combine header with rest of stream
 	combinedReader := io.MultiReader(bytes.NewReader(header), r)
 
+	// Hex dump mode requested explicitly
+	if opts.HexDump {
+		return streamHex(ctx, combinedReader)
+	}
+
 	// Binary file handling
 	isBin := IsBinary(header)
 	if isBin && !opts.ForceBinary {
@@ -100,10 +105,6 @@ func viewTarget(ctx *command.Context, target string, opts Options) error {
 			// Stream raw binary bytes in plain mode (pipeline safety)
 			_, err := io.Copy(ctx.Stdout, combinedReader)
 			return err
-		}
-
-		if opts.HexDump {
-			return streamHex(ctx, combinedReader)
 		}
 
 		// Human mode warning banner
@@ -126,11 +127,6 @@ func viewTarget(ctx *command.Context, target string, opts Options) error {
 			}
 		}
 		return nil
-	}
-
-	// Hex dump mode requested explicitly
-	if opts.HexDump {
-		return streamHex(ctx, combinedReader)
 	}
 
 	// Detect syntax language
