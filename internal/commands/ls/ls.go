@@ -3,9 +3,11 @@ package ls
 import (
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"nova/internal/command"
 	"nova/internal/filesystem"
+	"nova/internal/git"
 	"nova/internal/output"
 	"nova/internal/theme"
 )
@@ -74,6 +76,16 @@ func listPath(ctx *command.Context, path string, opts Options, showIcons bool, v
 	}
 
 	SortEntries(entries, opts.Sort, opts.Reverse, opts.DirsFirst)
+
+	// Annotate with Git status if inside repository
+	if repoStatus, _ := git.GetRepoStatus(path, 50*time.Millisecond); repoStatus != nil {
+		for i := range entries {
+			st := repoStatus.GetStatus(entries[i].Path)
+			if st != git.StatusClean {
+				entries[i].GitStatus = string(st)
+			}
+		}
+	}
 
 	switch ctx.Printer.Mode {
 	case output.ModeJSON:

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"nova/internal/git"
 	"nova/internal/renderer"
 	"nova/internal/theme"
 )
@@ -90,7 +91,12 @@ func renderHeader(m *Model, width int) string {
 	pathStr := m.Theme.Format(theme.RoleDirectory, m.CurrentDir, m.Profile)
 	itemsBadge := m.Theme.Format(theme.RoleMuted, " "+countStr, m.Profile)
 
-	raw := badge + pathStr + itemsBadge
+	gitBadge := ""
+	if m.Git != nil && m.Git.Branch != "" {
+		gitBadge = " " + git.FormatBranch(m.Git.Branch, m.Git.IsDetached, m.UnicodeSupported, m.Theme, m.Profile)
+	}
+
+	raw := badge + pathStr + gitBadge + itemsBadge
 	return padOrTruncate(raw, width)
 }
 
@@ -126,8 +132,15 @@ func renderLeftCell(m *Model, row int, width int) string {
 		sizeStr = renderer.FormatSize(entry.Size, true)
 	}
 
+	// Git status indicator
+	gitBadge := ""
+	if entry.GitStatus != "" && entry.GitStatus != string(git.StatusClean) {
+		badge := git.FormatStatusBadge(git.FileStatus(entry.GitStatus), m.Theme, m.Profile)
+		gitBadge = badge + " "
+	}
+
 	// Available space for name
-	availNameWidth := width - len(prefix) - len(entry.Icon) - len(sizeStr) - 2
+	availNameWidth := width - len(prefix) - len(gitBadge) - len(entry.Icon) - len(sizeStr) - 2
 	if availNameWidth < 4 {
 		availNameWidth = 4
 	}
@@ -136,13 +149,13 @@ func renderLeftCell(m *Model, row int, width int) string {
 	styledName := m.Theme.Format(role, truncatedName, m.Profile)
 
 	// Combine components
-	visibleLen := renderer.VisibleWidth(prefix + entry.Icon + truncatedName + sizeStr)
+	visibleLen := renderer.VisibleWidth(prefix + gitBadge + entry.Icon + truncatedName + sizeStr)
 	paddingSpaces := width - visibleLen
 	if paddingSpaces < 0 {
 		paddingSpaces = 0
 	}
 
-	line := prefix + entry.Icon + styledName + strings.Repeat(" ", paddingSpaces) + m.Theme.Format(theme.RoleMuted, sizeStr, m.Profile)
+	line := prefix + gitBadge + entry.Icon + styledName + strings.Repeat(" ", paddingSpaces) + m.Theme.Format(theme.RoleMuted, sizeStr, m.Profile)
 
 	if isSelected {
 		return m.Theme.Format(theme.RoleSelection, line, m.Profile)

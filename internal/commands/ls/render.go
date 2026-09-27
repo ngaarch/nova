@@ -5,6 +5,7 @@ import (
 
 	"nova/internal/command"
 	"nova/internal/filesystem"
+	"nova/internal/git"
 	"nova/internal/renderer"
 	"nova/internal/theme"
 )
@@ -44,6 +45,17 @@ func RenderLong(ctx *command.Context, entries []filesystem.Entry, showIcons bool
 	prof := ctx.Caps.ColorProfile
 	tbl := renderer.NewTable(ctx.Caps.Width)
 
+	hasGit := false
+	for _, entry := range entries {
+		if entry.GitStatus != "" {
+			hasGit = true
+			break
+		}
+	}
+
+	if hasGit {
+		tbl.AddColumn("Git", renderer.AlignCenter)
+	}
 	tbl.AddColumn("Permissions", renderer.AlignLeft)
 	tbl.AddColumn("Owner", renderer.AlignLeft)
 	tbl.AddColumn("Group", renderer.AlignLeft)
@@ -74,7 +86,15 @@ func RenderLong(ctx *command.Context, entries []filesystem.Entry, showIcons bool
 		dateStr := th.Format(theme.RoleDate, FormatTime(entry.ModTime), prof)
 		nameStr := FormatName(entry, icon, th, prof)
 
-		tbl.AddRow(permStr, ownerStr, groupStr, sizeStr, dateStr, nameStr)
+		if hasGit {
+			gitBadge := " "
+			if entry.GitStatus != "" {
+				gitBadge = git.FormatStatusBadge(git.FileStatus(entry.GitStatus), th, prof)
+			}
+			tbl.AddRow(gitBadge, permStr, ownerStr, groupStr, sizeStr, dateStr, nameStr)
+		} else {
+			tbl.AddRow(permStr, ownerStr, groupStr, sizeStr, dateStr, nameStr)
+		}
 	}
 
 	lines := tbl.Render(false)

@@ -24,6 +24,7 @@ type Entry struct {
 	Blocks      int64            `json:"blocks,omitempty"`
 	Inode       uint64           `json:"inode,omitempty"`
 	EntityType  theme.EntityType `json:"entity_type"`
+	GitStatus   string           `json:"git_status,omitempty"`
 }
 
 // ClassifyEntityType determines the theme.EntityType based on entry attributes and file permissions.

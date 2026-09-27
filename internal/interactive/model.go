@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
+	"nova/internal/git"
 	"nova/internal/terminal"
 	"nova/internal/theme"
 )
@@ -26,6 +28,7 @@ type Model struct {
 	Profile          terminal.ColorProfile
 	UnicodeSupported bool
 	PreviewLines     []string
+	Git              *git.RepoStatus
 }
 
 // NewModel constructs an initialized Model starting at dir.
@@ -72,6 +75,16 @@ func (m *Model) LoadCurrentDir() error {
 	entries, err := ReadDir(m.CurrentDir, m.ShowHidden, m.UnicodeSupported)
 	if err != nil {
 		return err
+	}
+
+	m.Git, _ = git.GetRepoStatus(m.CurrentDir, 50*time.Millisecond)
+	if m.Git != nil {
+		for i := range entries {
+			st := m.Git.GetStatus(entries[i].Path)
+			if st != git.StatusClean {
+				entries[i].GitStatus = string(st)
+			}
+		}
 	}
 
 	m.Entries = entries

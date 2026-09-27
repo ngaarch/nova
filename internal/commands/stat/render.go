@@ -7,6 +7,7 @@ import (
 
 	"nova/internal/command"
 	"nova/internal/filesystem"
+	"nova/internal/git"
 	"nova/internal/renderer"
 	"nova/internal/terminal"
 	"nova/internal/theme"
@@ -82,6 +83,18 @@ func RenderHuman(ctx *command.Context, st *filesystem.DetailedStat) {
 	if !st.BirthTime.IsZero() {
 		ctx.Printer.Println(fmt.Sprintf(" Birth: %s", st.BirthTime.Format(timeFmt)))
 	}
+
+	// Git status
+	if st.GitBranch != "" {
+		branchFmt := git.FormatBranch(st.GitBranch, false, ctx.Caps.UnicodeSupported, th, profile)
+		gitStatusDesc := "clean"
+		if st.GitStatus != "" {
+			badge := git.FormatStatusBadge(git.FileStatus(st.GitStatus), th, profile)
+			gitStatusDesc = fmt.Sprintf("%s (%s)", badge, st.GitStatus)
+		}
+		labelGit := th.Format(theme.RoleAccent, "  Git: ", profile)
+		ctx.Printer.Println(fmt.Sprintf("%s%s   Status: %s", labelGit, branchFmt, gitStatusDesc))
+	}
 }
 
 // RenderPlain prints tab-separated key-value pairs suitable for scripts.
@@ -103,6 +116,14 @@ func RenderPlain(ctx *command.Context, st *filesystem.DetailedStat) {
 	b.WriteString(fmt.Sprintf("ChangeTime:\t%s\n", st.ChangeTime.Format(timeFmt)))
 	if st.IsSymlink {
 		b.WriteString(fmt.Sprintf("LinkTarget:\t%s\n", st.LinkTarget))
+	}
+	if st.GitBranch != "" {
+		b.WriteString(fmt.Sprintf("GitBranch:\t%s\n", st.GitBranch))
+		stDesc := st.GitStatus
+		if stDesc == "" {
+			stDesc = "clean"
+		}
+		b.WriteString(fmt.Sprintf("GitStatus:\t%s\n", stDesc))
 	}
 	ctx.Printer.Print(b.String())
 }

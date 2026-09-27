@@ -25,6 +25,7 @@ type Entry struct {
 	ModTime       time.Time
 	Extension     string
 	Icon          string
+	GitStatus     string
 }
 
 // ReadDir reads the directory at path and returns a sorted slice of Entries.

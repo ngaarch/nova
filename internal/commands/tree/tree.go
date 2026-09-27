@@ -1,8 +1,11 @@
 package tree
 
 import (
+	"time"
+
 	"nova/internal/command"
 	"nova/internal/filesystem"
+	"nova/internal/git"
 	"nova/internal/output"
 )
 
@@ -46,6 +49,11 @@ func Run(ctx *command.Context, args []string) error {
 		return command.NewOpError("failed to inspect directory tree", opts.Path, err, "Check file permissions and directory path.")
 	}
 
+	repoStatus, _ := git.GetRepoStatus(opts.Path, 50*time.Millisecond)
+	if repoStatus != nil {
+		annotateTreeWithGit(rootNode, repoStatus)
+	}
+
 	if opts.JSON {
 		return RenderJSON(ctx, rootNode)
 	}
@@ -60,6 +68,19 @@ func Run(ctx *command.Context, args []string) error {
 		showIcons = (ctx.Printer.Mode == output.ModeHuman && !opts.Plain)
 	}
 
-	RenderTree(ctx, rootNode, opts, showIcons)
+	RenderTree(ctx, rootNode, opts, showIcons, repoStatus)
 	return nil
+}
+
+func annotateTreeWithGit(node *filesystem.TreeNode, repo *git.RepoStatus) {
+	if node == nil || repo == nil {
+		return
+	}
+	st := repo.GetStatus(node.Entry.Path)
+	if st != git.StatusClean {
+		node.Entry.GitStatus = string(st)
+	}
+	for _, child := range node.Children {
+		annotateTreeWithGit(child, repo)
+	}
 }

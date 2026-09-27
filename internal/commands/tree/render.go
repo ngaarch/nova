@@ -7,13 +7,14 @@ import (
 
 	"nova/internal/command"
 	"nova/internal/filesystem"
+	"nova/internal/git"
 	"nova/internal/renderer"
 	"nova/internal/terminal"
 	"nova/internal/theme"
 )
 
 // RenderTree renders the directory tree to the printer according to options.
-func RenderTree(ctx *command.Context, root *filesystem.TreeNode, opts Options, showIcons bool) {
+func RenderTree(ctx *command.Context, root *filesystem.TreeNode, opts Options, showIcons bool, repo *git.RepoStatus) {
 	isUnicode := ctx.Caps.UnicodeSupported && !opts.Plain
 	profile := ctx.Caps.ColorProfile
 	if opts.Plain {
@@ -29,7 +30,12 @@ func RenderTree(ctx *command.Context, root *filesystem.TreeNode, opts Options, s
 		icon := theme.LookupIcon(root.Entry.Name, root.Entry.EntityType, ctx.Caps.UnicodeSupported)
 		rootName = icon + rootName
 	}
-	ctx.Printer.Println(ctx.Theme.Format(theme.RoleDirectory, rootName, profile))
+	rootHeader := ctx.Theme.Format(theme.RoleDirectory, rootName, profile)
+	if repo != nil && repo.Branch != "" {
+		branchFmt := git.FormatBranch(repo.Branch, repo.IsDetached, isUnicode, ctx.Theme, profile)
+		rootHeader += " [" + branchFmt + "]"
+	}
+	ctx.Printer.Println(rootHeader)
 
 	// Render descendants
 	renderNodeChildren(ctx, root.Children, "", isUnicode, profile, opts, showIcons)
@@ -135,12 +141,22 @@ func renderNodeChildren(ctx *command.Context, children []*filesystem.TreeNode, p
 			nameStyled += ctx.Theme.Format(theme.RoleWarning, " [cycle detected]", profile)
 		}
 
+		gitBadge := ""
+		if child.Entry.GitStatus != "" && child.Entry.GitStatus != string(git.StatusClean) {
+			if profile != terminal.ColorNone {
+				gitBadge = git.FormatStatusBadge(git.FileStatus(child.Entry.GitStatus), ctx.Theme, profile) + " "
+			} else {
+				gitBadge = "[" + child.Entry.GitStatus + "] "
+			}
+		}
+
 		var lineBuilder strings.Builder
 		lineBuilder.WriteString(prefixStyled)
 		lineBuilder.WriteString(branchStyled)
 		for _, m := range metaParts {
 			lineBuilder.WriteString(m + " ")
 		}
+		lineBuilder.WriteString(gitBadge)
 		lineBuilder.WriteString(iconPart)
 		lineBuilder.WriteString(nameStyled)
 

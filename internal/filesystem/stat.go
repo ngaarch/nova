@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"nova/internal/git"
 	"nova/internal/theme"
 )
 
@@ -34,6 +35,8 @@ type DetailedStat struct {
 	IsSymlink   bool             `json:"is_symlink"`
 	IsBroken    bool             `json:"is_broken"`
 	LinkTarget  string           `json:"link_target,omitempty"`
+	GitBranch   string           `json:"git_branch,omitempty"`
+	GitStatus   string           `json:"git_status,omitempty"`
 }
 
 // GetDetailedStat returns rich filesystem status metadata for path.
@@ -78,5 +81,19 @@ func GetDetailedStat(path string) (*DetailedStat, error) {
 	}
 
 	populateDetailedPlatformStat(fi, stat)
+
+	// Populate Git repository metadata if within repository
+	dir := path
+	if !fi.IsDir() {
+		dir = filepath.Dir(path)
+	}
+	if repo, err := git.GetRepoStatus(dir, 50*time.Millisecond); err == nil && repo != nil {
+		stat.GitBranch = repo.Branch
+		st := repo.GetStatus(path)
+		if st != git.StatusClean {
+			stat.GitStatus = string(st)
+		}
+	}
+
 	return stat, nil
 }
