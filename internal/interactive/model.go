@@ -31,6 +31,13 @@ type Model struct {
 	UnicodeSupported bool
 	PreviewLines     []string
 	Git              *git.RepoStatus
+	SelectedPaths    map[string]bool
+	ActionMessage    string
+	ActionTime       time.Time
+	ConfirmDelete    bool
+	RenameActive     bool
+	RenameInput      string
+	Tick             int
 }
 
 // Lock acquires exclusive write lock on model state.
@@ -83,6 +90,7 @@ func NewModel(dir string, width, height int, showHidden bool, th *theme.Theme, p
 		Theme:            th,
 		Profile:          profile,
 		UnicodeSupported: unicodeSupported,
+		SelectedPaths:    make(map[string]bool),
 	}
 
 	if err := m.LoadCurrentDir(); err != nil {
@@ -90,6 +98,33 @@ func NewModel(dir string, width, height int, showHidden bool, th *theme.Theme, p
 	}
 
 	return m, nil
+}
+
+// ToggleSelect toggles selection of the current entry.
+func (m *Model) ToggleSelect() {
+	entry := m.CurrentEntry()
+	if entry == nil {
+		return
+	}
+	if m.SelectedPaths == nil {
+		m.SelectedPaths = make(map[string]bool)
+	}
+	if m.SelectedPaths[entry.Path] {
+		delete(m.SelectedPaths, entry.Path)
+	} else {
+		m.SelectedPaths[entry.Path] = true
+	}
+}
+
+// ClearSelection unchecks all selected items.
+func (m *Model) ClearSelection() {
+	m.SelectedPaths = make(map[string]bool)
+}
+
+// SetActionMessage displays a temporary toast status message.
+func (m *Model) SetActionMessage(msg string) {
+	m.ActionMessage = msg
+	m.ActionTime = time.Now()
 }
 
 // LoadCurrentDir reloads files in the current working directory.

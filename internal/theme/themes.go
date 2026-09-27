@@ -201,6 +201,191 @@ var (
 			RolePermExec:  {Fg: rgbPtr(HexRGB(0x39FF14)), Bold: true},
 		},
 	}
+
+	ThemeCyberpunk = &Theme{
+		Name: "cyberpunk",
+		Styles: map[Role]Style{
+			RoleDirectory:     {Fg: rgbPtr(HexRGB(0x00F0FF)), Bold: true},
+			RoleRegularFile:   {Fg: rgbPtr(HexRGB(0xFAF0F6))},
+			RoleExecutable:    {Fg: rgbPtr(HexRGB(0x39FF14)), Bold: true},
+			RoleSymlink:       {Fg: rgbPtr(HexRGB(0xFF007F)), Italic: true},
+			RoleBrokenSymlink: {Fg: rgbPtr(HexRGB(0xFF0033)), Bold: true, Underline: true},
+			RolePipe:          {Fg: rgbPtr(HexRGB(0xFFE600))},
+			RoleSocket:        {Fg: rgbPtr(HexRGB(0x9D00FF)), Bold: true},
+			RoleDevice:        {Fg: rgbPtr(HexRGB(0xFFE600))},
+			RoleArchive:       {Fg: rgbPtr(HexRGB(0xFF007F))},
+			RoleCode:          {Fg: rgbPtr(HexRGB(0x00F0FF))},
+			RoleDocument:      {Fg: rgbPtr(HexRGB(0xFFE600))},
+			RoleImage:         {Fg: rgbPtr(HexRGB(0x9D00FF))},
+			RoleAudio:         {Fg: rgbPtr(HexRGB(0x00F0FF))},
+			RoleVideo:         {Fg: rgbPtr(HexRGB(0x39FF14))},
+			RoleHidden:        {Fg: rgbPtr(HexRGB(0x606080))},
+
+			RoleSuccess:   {Fg: rgbPtr(HexRGB(0x39FF14)), Bold: true},
+			RoleWarning:   {Fg: rgbPtr(HexRGB(0xFFE600)), Bold: true},
+			RoleError:     {Fg: rgbPtr(HexRGB(0xFF0033)), Bold: true},
+			RoleInfo:      {Fg: rgbPtr(HexRGB(0x00F0FF))},
+			RoleMuted:     {Fg: rgbPtr(HexRGB(0x606080))},
+			RoleSelection: {Fg: rgbPtr(HexRGB(0x000000)), Bg: rgbPtr(HexRGB(0x00F0FF)), Bold: true},
+			RoleAccent:    {Fg: rgbPtr(HexRGB(0xFF007F)), Bold: true},
+
+			RoleSize:      {Fg: rgbPtr(HexRGB(0x39FF14))},
+			RoleDate:      {Fg: rgbPtr(HexRGB(0x00F0FF))},
+			RoleUser:      {Fg: rgbPtr(HexRGB(0xFFE600))},
+			RoleGroup:     {Fg: rgbPtr(HexRGB(0xFF007F))},
+			RolePermRead:  {Fg: rgbPtr(HexRGB(0xFFE600))},
+			RolePermWrite: {Fg: rgbPtr(HexRGB(0xFF0033))},
+			RolePermExec:  {Fg: rgbPtr(HexRGB(0x39FF14)), Bold: true},
+		},
+	}
+
+	ThemeSynthwave = &Theme{
+		Name: "synthwave",
+		Styles: map[Role]Style{
+			RoleDirectory:     {Fg: rgbPtr(HexRGB(0xFF71CE)), Bold: true},
+			RoleRegularFile:   {Fg: rgbPtr(HexRGB(0xFEE8FF))},
+			RoleExecutable:    {Fg: rgbPtr(HexRGB(0x01CDFE)), Bold: true},
+			RoleSymlink:       {Fg: rgbPtr(HexRGB(0x05FFA1)), Italic: true},
+			RoleBrokenSymlink: {Fg: rgbPtr(HexRGB(0xFF2A85)), Bold: true, Underline: true},
+			RolePipe:          {Fg: rgbPtr(HexRGB(0xFFB961))},
+			RoleSocket:        {Fg: rgbPtr(HexRGB(0xB967FF)), Bold: true},
+			RoleDevice:        {Fg: rgbPtr(HexRGB(0xFFFB96))},
+			RoleArchive:       {Fg: rgbPtr(HexRGB(0xFF71CE))},
+			RoleCode:          {Fg: rgbPtr(HexRGB(0x01CDFE))},
+			RoleDocument:      {Fg: rgbPtr(HexRGB(0xFFFB96))},
+			RoleImage:         {Fg: rgbPtr(HexRGB(0xB967FF))},
+			RoleAudio:         {Fg: rgbPtr(HexRGB(0x05FFA1))},
+			RoleVideo:         {Fg: rgbPtr(HexRGB(0x01CDFE))},
+			RoleHidden:        {Fg: rgbPtr(HexRGB(0x61486F))},
+
+			RoleSuccess:   {Fg: rgbPtr(HexRGB(0x05FFA1)), Bold: true},
+			RoleWarning:   {Fg: rgbPtr(HexRGB(0xFFB961)), Bold: true},
+			RoleError:     {Fg: rgbPtr(HexRGB(0xFF2A85)), Bold: true},
+			RoleInfo:      {Fg: rgbPtr(HexRGB(0x01CDFE))},
+			RoleMuted:     {Fg: rgbPtr(HexRGB(0x61486F))},
+			RoleSelection: {Fg: rgbPtr(HexRGB(0x261447)), Bg: rgbPtr(HexRGB(0xFF71CE)), Bold: true},
+			RoleAccent:    {Fg: rgbPtr(HexRGB(0xFF71CE)), Bold: true},
+
+			RoleSize:      {Fg: rgbPtr(HexRGB(0x05FFA1))},
+			RoleDate:      {Fg: rgbPtr(HexRGB(0x01CDFE))},
+			RoleUser:      {Fg: rgbPtr(HexRGB(0xFFFB96))},
+			RoleGroup:     {Fg: rgbPtr(HexRGB(0xB967FF))},
+			RolePermRead:  {Fg: rgbPtr(HexRGB(0xFFFB96))},
+			RolePermWrite: {Fg: rgbPtr(HexRGB(0xFF2A85))},
+			RolePermExec:  {Fg: rgbPtr(HexRGB(0x01CDFE)), Bold: true},
+		},
+	}
+
+	ThemeTokyoNight = &Theme{
+		Name: "tokyo-night",
+		Styles: map[Role]Style{
+			RoleDirectory:     {Fg: rgbPtr(HexRGB(0x7AA2F7)), Bold: true},
+			RoleRegularFile:   {Fg: rgbPtr(HexRGB(0xC0CAF5))},
+			RoleExecutable:    {Fg: rgbPtr(HexRGB(0x9ECE6A)), Bold: true},
+			RoleSymlink:       {Fg: rgbPtr(HexRGB(0x7DCFFF)), Italic: true},
+			RoleBrokenSymlink: {Fg: rgbPtr(HexRGB(0xF7768E)), Bold: true, Underline: true},
+			RolePipe:          {Fg: rgbPtr(HexRGB(0xFF9E64))},
+			RoleSocket:        {Fg: rgbPtr(HexRGB(0xBB9AF7)), Bold: true},
+			RoleDevice:        {Fg: rgbPtr(HexRGB(0xE0AF68))},
+			RoleArchive:       {Fg: rgbPtr(HexRGB(0xF7768E))},
+			RoleCode:          {Fg: rgbPtr(HexRGB(0x7AA2F7))},
+			RoleDocument:      {Fg: rgbPtr(HexRGB(0xE0AF68))},
+			RoleImage:         {Fg: rgbPtr(HexRGB(0xBB9AF7))},
+			RoleAudio:         {Fg: rgbPtr(HexRGB(0x7DCFFF))},
+			RoleVideo:         {Fg: rgbPtr(HexRGB(0x9ECE6A))},
+			RoleHidden:        {Fg: rgbPtr(HexRGB(0x565F89))},
+
+			RoleSuccess:   {Fg: rgbPtr(HexRGB(0x9ECE6A)), Bold: true},
+			RoleWarning:   {Fg: rgbPtr(HexRGB(0xE0AF68)), Bold: true},
+			RoleError:     {Fg: rgbPtr(HexRGB(0xF7768E)), Bold: true},
+			RoleInfo:      {Fg: rgbPtr(HexRGB(0x7DCFFF))},
+			RoleMuted:     {Fg: rgbPtr(HexRGB(0x565F89))},
+			RoleSelection: {Fg: rgbPtr(HexRGB(0xC0CAF5)), Bg: rgbPtr(HexRGB(0x283457)), Bold: true},
+			RoleAccent:    {Fg: rgbPtr(HexRGB(0x7AA2F7)), Bold: true},
+
+			RoleSize:      {Fg: rgbPtr(HexRGB(0x9ECE6A))},
+			RoleDate:      {Fg: rgbPtr(HexRGB(0x7DCFFF))},
+			RoleUser:      {Fg: rgbPtr(HexRGB(0xE0AF68))},
+			RoleGroup:     {Fg: rgbPtr(HexRGB(0xFF9E64))},
+			RolePermRead:  {Fg: rgbPtr(HexRGB(0xE0AF68))},
+			RolePermWrite: {Fg: rgbPtr(HexRGB(0xF7768E))},
+			RolePermExec:  {Fg: rgbPtr(HexRGB(0x9ECE6A)), Bold: true},
+		},
+	}
+
+	ThemeCatppuccin = &Theme{
+		Name: "catppuccin",
+		Styles: map[Role]Style{
+			RoleDirectory:     {Fg: rgbPtr(HexRGB(0x89B4FA)), Bold: true},
+			RoleRegularFile:   {Fg: rgbPtr(HexRGB(0xCDD6F4))},
+			RoleExecutable:    {Fg: rgbPtr(HexRGB(0xA6E3A1)), Bold: true},
+			RoleSymlink:       {Fg: rgbPtr(HexRGB(0x94E2D5)), Italic: true},
+			RoleBrokenSymlink: {Fg: rgbPtr(HexRGB(0xF38BA8)), Bold: true, Underline: true},
+			RolePipe:          {Fg: rgbPtr(HexRGB(0xFAB387))},
+			RoleSocket:        {Fg: rgbPtr(HexRGB(0xCBA6F7)), Bold: true},
+			RoleDevice:        {Fg: rgbPtr(HexRGB(0xF9E2AF))},
+			RoleArchive:       {Fg: rgbPtr(HexRGB(0xF38BA8))},
+			RoleCode:          {Fg: rgbPtr(HexRGB(0x89B4FA))},
+			RoleDocument:      {Fg: rgbPtr(HexRGB(0xF9E2AF))},
+			RoleImage:         {Fg: rgbPtr(HexRGB(0xCBA6F7))},
+			RoleAudio:         {Fg: rgbPtr(HexRGB(0x94E2D5))},
+			RoleVideo:         {Fg: rgbPtr(HexRGB(0xA6E3A1))},
+			RoleHidden:        {Fg: rgbPtr(HexRGB(0x6C7086))},
+
+			RoleSuccess:   {Fg: rgbPtr(HexRGB(0xA6E3A1)), Bold: true},
+			RoleWarning:   {Fg: rgbPtr(HexRGB(0xF9E2AF)), Bold: true},
+			RoleError:     {Fg: rgbPtr(HexRGB(0xF38BA8)), Bold: true},
+			RoleInfo:      {Fg: rgbPtr(HexRGB(0x89DCEB))},
+			RoleMuted:     {Fg: rgbPtr(HexRGB(0x6C7086))},
+			RoleSelection: {Fg: rgbPtr(HexRGB(0xCDD6F4)), Bg: rgbPtr(HexRGB(0x45475A)), Bold: true},
+			RoleAccent:    {Fg: rgbPtr(HexRGB(0xCBA6F7)), Bold: true},
+
+			RoleSize:      {Fg: rgbPtr(HexRGB(0xA6E3A1))},
+			RoleDate:      {Fg: rgbPtr(HexRGB(0x89DCEB))},
+			RoleUser:      {Fg: rgbPtr(HexRGB(0xF9E2AF))},
+			RoleGroup:     {Fg: rgbPtr(HexRGB(0xFAB387))},
+			RolePermRead:  {Fg: rgbPtr(HexRGB(0xF9E2AF))},
+			RolePermWrite: {Fg: rgbPtr(HexRGB(0xF38BA8))},
+			RolePermExec:  {Fg: rgbPtr(HexRGB(0xA6E3A1)), Bold: true},
+		},
+	}
+
+	ThemeGruvbox = &Theme{
+		Name: "gruvbox",
+		Styles: map[Role]Style{
+			RoleDirectory:     {Fg: rgbPtr(HexRGB(0x83A598)), Bold: true},
+			RoleRegularFile:   {Fg: rgbPtr(HexRGB(0xEBDBB2))},
+			RoleExecutable:    {Fg: rgbPtr(HexRGB(0xB8BB26)), Bold: true},
+			RoleSymlink:       {Fg: rgbPtr(HexRGB(0x8EC07C)), Italic: true},
+			RoleBrokenSymlink: {Fg: rgbPtr(HexRGB(0xFB4934)), Bold: true, Underline: true},
+			RolePipe:          {Fg: rgbPtr(HexRGB(0xFE8019))},
+			RoleSocket:        {Fg: rgbPtr(HexRGB(0xD3869B)), Bold: true},
+			RoleDevice:        {Fg: rgbPtr(HexRGB(0xFABD2F))},
+			RoleArchive:       {Fg: rgbPtr(HexRGB(0xFB4934))},
+			RoleCode:          {Fg: rgbPtr(HexRGB(0x83A598))},
+			RoleDocument:      {Fg: rgbPtr(HexRGB(0xFABD2F))},
+			RoleImage:         {Fg: rgbPtr(HexRGB(0xD3869B))},
+			RoleAudio:         {Fg: rgbPtr(HexRGB(0x8EC07C))},
+			RoleVideo:         {Fg: rgbPtr(HexRGB(0xB8BB26))},
+			RoleHidden:        {Fg: rgbPtr(HexRGB(0x928374))},
+
+			RoleSuccess:   {Fg: rgbPtr(HexRGB(0xB8BB26)), Bold: true},
+			RoleWarning:   {Fg: rgbPtr(HexRGB(0xFABD2F)), Bold: true},
+			RoleError:     {Fg: rgbPtr(HexRGB(0xFB4934)), Bold: true},
+			RoleInfo:      {Fg: rgbPtr(HexRGB(0x83A598))},
+			RoleMuted:     {Fg: rgbPtr(HexRGB(0x928374))},
+			RoleSelection: {Fg: rgbPtr(HexRGB(0xEBDBB2)), Bg: rgbPtr(HexRGB(0x504945)), Bold: true},
+			RoleAccent:    {Fg: rgbPtr(HexRGB(0xFE8019)), Bold: true},
+
+			RoleSize:      {Fg: rgbPtr(HexRGB(0xB8BB26))},
+			RoleDate:      {Fg: rgbPtr(HexRGB(0x8EC07C))},
+			RoleUser:      {Fg: rgbPtr(HexRGB(0xFABD2F))},
+			RoleGroup:     {Fg: rgbPtr(HexRGB(0xFE8019))},
+			RolePermRead:  {Fg: rgbPtr(HexRGB(0xFABD2F))},
+			RolePermWrite: {Fg: rgbPtr(HexRGB(0xFB4934))},
+			RolePermExec:  {Fg: rgbPtr(HexRGB(0xB8BB26)), Bold: true},
+		},
+	}
 )
 
 // Get returns the Theme with the given name, falling back to ThemeDefault if not found.
@@ -216,7 +401,34 @@ func Get(name string) *Theme {
 		return ThemeDracula
 	case "neon":
 		return ThemeNeon
+	case "cyberpunk":
+		return ThemeCyberpunk
+	case "synthwave":
+		return ThemeSynthwave
+	case "tokyonight", "tokyo-night":
+		return ThemeTokyoNight
+	case "catppuccin", "catppuccin-mocha", "mocha":
+		return ThemeCatppuccin
+	case "gruvbox", "gruvbox-dark":
+		return ThemeGruvbox
 	default:
 		return ThemeDefault
+	}
+}
+
+// ListThemes returns the list of all available theme names.
+func ListThemes() []string {
+	return []string{
+		"default",
+		"dracula",
+		"nord",
+		"neon",
+		"cyberpunk",
+		"synthwave",
+		"tokyo-night",
+		"catppuccin",
+		"gruvbox",
+		"minimal",
+		"mono",
 	}
 }

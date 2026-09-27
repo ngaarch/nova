@@ -126,7 +126,7 @@ func (s Style) Format(text string, profile terminal.ColorProfile) string {
 	if s.Bg != nil {
 		switch profile {
 		case terminal.ColorTrueColor:
-			codes = append(codes, fmt.Sprintf("48;2;%d;%d;%d", s.Bg.R, s.Bg.B, s.Bg.B))
+			codes = append(codes, fmt.Sprintf("48;2;%d;%d;%d", s.Bg.R, s.Bg.G, s.Bg.B))
 		case terminal.Color256:
 			codes = append(codes, fmt.Sprintf("48;5;%d", s.Bg.ANSI256()))
 		case terminal.Color16:
@@ -144,4 +144,74 @@ func (s Style) Format(text string, profile terminal.ColorProfile) string {
 	}
 
 	return fmt.Sprintf("\x1b[%sm%s\x1b[0m", strings.Join(codes, ";"), text)
+}
+
+// InterpolateRGB smoothly blends two RGB colors by parameter t (0.0 to 1.0).
+func InterpolateRGB(from, to RGB, t float64) RGB {
+	if t <= 0.0 {
+		return from
+	}
+	if t >= 1.0 {
+		return to
+	}
+	r := uint8(float64(from.R) + t*(float64(to.R)-float64(from.R)))
+	g := uint8(float64(from.G) + t*(float64(to.G)-float64(from.G)))
+	b := uint8(float64(from.B) + t*(float64(to.B)-float64(from.B)))
+	return RGB{R: r, G: g, B: b}
+}
+
+// FormatGradient renders text with a smooth color gradient from startColor to endColor.
+func FormatGradient(text string, from, to RGB, profile terminal.ColorProfile) string {
+	if text == "" || profile == terminal.ColorNone {
+		return text
+	}
+	runes := []rune(text)
+	n := len(runes)
+	if n <= 1 {
+		st := Style{Fg: &from}
+		return st.Format(text, profile)
+	}
+
+	var sb strings.Builder
+	for i, r := range runes {
+		t := float64(i) / float64(n-1)
+		col := InterpolateRGB(from, to, t)
+		st := Style{Fg: &col}
+		sb.WriteString(st.Format(string(r), profile))
+	}
+	return sb.String()
+}
+
+// FormatMultiGradient renders text with a gradient spanning multiple RGB stops.
+func FormatMultiGradient(text string, stops []RGB, profile terminal.ColorProfile) string {
+	if len(stops) == 0 || text == "" || profile == terminal.ColorNone {
+		return text
+	}
+	if len(stops) == 1 {
+		st := Style{Fg: &stops[0]}
+		return st.Format(text, profile)
+	}
+
+	runes := []rune(text)
+	n := len(runes)
+	if n <= 1 {
+		st := Style{Fg: &stops[0]}
+		return st.Format(text, profile)
+	}
+
+	var sb strings.Builder
+	segments := float64(len(stops) - 1)
+	for i, r := range runes {
+		norm := float64(i) / float64(n-1) // 0.0 to 1.0
+		scaled := norm * segments
+		segIdx := int(scaled)
+		if segIdx >= len(stops)-1 {
+			segIdx = len(stops) - 2
+		}
+		localT := scaled - float64(segIdx)
+		col := InterpolateRGB(stops[segIdx], stops[segIdx+1], localT)
+		st := Style{Fg: &col}
+		sb.WriteString(st.Format(string(r), profile))
+	}
+	return sb.String()
 }

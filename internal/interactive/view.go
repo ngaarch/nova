@@ -2,7 +2,10 @@ package interactive
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"nova/internal/git"
 	"nova/internal/renderer"
@@ -82,13 +85,43 @@ func Render(m *Model) string {
 }
 
 func renderHeader(m *Model, width int) string {
-	countStr := fmt.Sprintf("(%d items)", len(m.Filtered))
-	if m.FilterQuery != "" {
-		countStr = fmt.Sprintf("(%d/%d items, filter: %q)", len(m.Filtered), len(m.Entries), m.FilterQuery)
+	badge := m.Theme.Format(theme.RoleAccent, "[nova] ", m.Profile)
+
+	// Breadcrumb path styling
+	home, _ := os.UserHomeDir()
+	displayDir := m.CurrentDir
+	if home != "" && strings.HasPrefix(displayDir, home) {
+		displayDir = "~" + strings.TrimPrefix(displayDir, home)
 	}
 
-	badge := m.Theme.Format(theme.RoleAccent, "[nova] ", m.Profile)
-	pathStr := m.Theme.Format(theme.RoleDirectory, m.CurrentDir, m.Profile)
+	sep := " › "
+	if !m.UnicodeSupported {
+		sep = " > "
+	}
+	parts := strings.Split(filepath.Clean(displayDir), string(filepath.Separator))
+	var styledCrumbs []string
+	for idx, part := range parts {
+		if part == "" {
+			if idx == 0 {
+				styledCrumbs = append(styledCrumbs, "/")
+			}
+			continue
+		}
+		if idx == len(parts)-1 {
+			styledCrumbs = append(styledCrumbs, m.Theme.Format(theme.RoleDirectory, part, m.Profile))
+		} else {
+			styledCrumbs = append(styledCrumbs, m.Theme.Format(theme.RoleMuted, part, m.Profile))
+		}
+	}
+	crumbStr := strings.Join(styledCrumbs, m.Theme.Format(theme.RoleMuted, sep, m.Profile))
+
+	countStr := fmt.Sprintf("(%d items)", len(m.Filtered))
+	if m.FilterQuery != "" {
+		countStr = fmt.Sprintf("(%d/%d, filter: %q)", len(m.Filtered), len(m.Entries), m.FilterQuery)
+	}
+	if len(m.SelectedPaths) > 0 {
+		countStr += fmt.Sprintf(" [%d sel]", len(m.SelectedPaths))
+	}
 	itemsBadge := m.Theme.Format(theme.RoleMuted, " "+countStr, m.Profile)
 
 	gitBadge := ""
@@ -96,7 +129,7 @@ func renderHeader(m *Model, width int) string {
 		gitBadge = " " + git.FormatBranch(m.Git.Branch, m.Git.IsDetached, m.UnicodeSupported, m.Theme, m.Profile)
 	}
 
-	raw := badge + pathStr + gitBadge + itemsBadge
+	raw := badge + crumbStr + gitBadge + itemsBadge
 	return padOrTruncate(raw, width)
 }
 
@@ -109,9 +142,19 @@ func renderLeftCell(m *Model, row int, width int) string {
 	entry := m.Filtered[itemIdx]
 	isSelected := itemIdx == m.Cursor
 
-	prefix := "  "
+	prefix := "   "
 	if isSelected {
-		prefix = "> "
+		if m.UnicodeSupported {
+			prefix = " ❯ "
+		} else {
+			prefix = " > "
+		}
+	}
+
+	// Selection checkmark
+	selectBadge := ""
+	if m.SelectedPaths != nil && m.SelectedPaths[entry.Path] {
+		selectBadge = m.Theme.Format(theme.RoleSuccess, "✔ ", m.Profile)
 	}
 
 	role := theme.RoleRegularFile
@@ -126,10 +169,18 @@ func renderLeftCell(m *Model, row int, width int) string {
 		role = theme.RoleError
 	}
 
-	// Size indicator on right of left pane
+	// Size indicator on right of left pane with color thresholds
 	sizeStr := ""
 	if !entry.IsDir {
 		sizeStr = renderer.FormatSize(entry.Size, true)
+	}
+	sizeRole := theme.RoleMuted
+	if entry.Size > 50*1024*1024 {
+		sizeRole = theme.RoleError
+	} else if entry.Size > 1*1024*1024 {
+		sizeRole = theme.RoleWarning
+	} else if entry.Size > 10*1024 {
+		sizeRole = theme.RoleInfo
 	}
 
 	// Git status indicator
@@ -140,22 +191,29 @@ func renderLeftCell(m *Model, row int, width int) string {
 	}
 
 	// Available space for name
-	availNameWidth := width - len(prefix) - len(gitBadge) - len(entry.Icon) - len(sizeStr) - 2
+	availNameWidth := width - len(prefix) - len(selectBadge) - len(gitBadge) - len(entry.Icon) - len(sizeStr) - 2
 	if availNameWidth < 4 {
 		availNameWidth = 4
 	}
 
 	truncatedName := renderer.Truncate(entry.Name, availNameWidth, "…")
-	styledName := m.Theme.Format(role, truncatedName, m.Profile)
+
+	// Match highlighting for fuzzy search
+	var styledName string
+	if m.FilterQuery != "" {
+		styledName = renderer.HighlightFuzzyMatch(truncatedName, m.FilterQuery, m.Theme.Style(theme.RoleAccent), m.Theme.Style(role), m.Profile)
+	} else {
+		styledName = m.Theme.Format(role, truncatedName, m.Profile)
+	}
 
 	// Combine components
-	visibleLen := renderer.VisibleWidth(prefix + gitBadge + entry.Icon + truncatedName + sizeStr)
+	visibleLen := renderer.VisibleWidth(prefix + selectBadge + gitBadge + entry.Icon + truncatedName + sizeStr)
 	paddingSpaces := width - visibleLen
 	if paddingSpaces < 0 {
 		paddingSpaces = 0
 	}
 
-	line := prefix + gitBadge + entry.Icon + styledName + strings.Repeat(" ", paddingSpaces) + m.Theme.Format(theme.RoleMuted, sizeStr, m.Profile)
+	line := prefix + selectBadge + gitBadge + entry.Icon + styledName + strings.Repeat(" ", paddingSpaces) + m.Theme.Format(sizeRole, sizeStr, m.Profile)
 
 	if isSelected {
 		return m.Theme.Format(theme.RoleSelection, line, m.Profile)
@@ -164,6 +222,25 @@ func renderLeftCell(m *Model, row int, width int) string {
 }
 
 func renderStatusBar(m *Model, width int) string {
+	if m.ConfirmDelete {
+		entry := m.CurrentEntry()
+		name := ""
+		if entry != nil {
+			name = entry.Name
+		}
+		delMsg := fmt.Sprintf("  ⚠ Delete %q? Press [y] to confirm, [Esc/any] to cancel", name)
+		return padOrTruncate(m.Theme.Format(theme.RoleError, delMsg, m.Profile), width)
+	}
+
+	if m.RenameActive {
+		renamePrompt := fmt.Sprintf("  ✏ Rename to: %s_", m.RenameInput)
+		return padOrTruncate(m.Theme.Format(theme.RoleWarning, renamePrompt, m.Profile), width)
+	}
+
+	if m.ActionMessage != "" && time.Since(m.ActionTime) < 3*time.Second {
+		return padOrTruncate(m.Theme.Format(theme.RoleSuccess, "  "+m.ActionMessage, m.Profile), width)
+	}
+
 	if m.FilterActive {
 		filterPrompt := fmt.Sprintf("/filter: %s_", m.FilterQuery)
 		return padOrTruncate(m.Theme.Format(theme.RoleWarning, filterPrompt, m.Profile), width)
@@ -174,16 +251,20 @@ func renderStatusBar(m *Model, width int) string {
 		return padOrTruncate(m.Theme.Format(theme.RoleMuted, "  Ready", m.Profile), width)
 	}
 
-	details := fmt.Sprintf("  %s  %s  %s", entry.Mode.String(), renderer.FormatSize(entry.Size, true), entry.ModTime.Format("2006-01-02 15:04:05"))
+	relTime := renderer.FormatRelativeTime(entry.ModTime)
+	details := fmt.Sprintf("  %s  %s  %s (%s)", entry.Mode.String(), renderer.FormatSize(entry.Size, true), relTime, entry.ModTime.Format("15:04:05"))
 	if entry.IsSymlink && entry.Target != "" {
 		details += fmt.Sprintf(" -> %s", entry.Target)
+	}
+	if len(m.SelectedPaths) > 0 {
+		details += fmt.Sprintf("  [%d selected]", len(m.SelectedPaths))
 	}
 
 	return padOrTruncate(m.Theme.Format(theme.RoleInfo, details, m.Profile), width)
 }
 
 func renderFooter(m *Model, width int) string {
-	hints := " [j/k,↑/↓] Move  [Enter/l] Open  [h/Bksp] Up  [/] Filter  [.] Hidden  [?] Help  [q] Quit"
+	hints := " [j/k] Move  [Enter] Open  [h] Up  [Space] Select  [e] Edit  [d] Delete  [r] Rename  [/] Filter  [?] Help  [q] Quit"
 	return padOrTruncate(m.Theme.Format(theme.RoleMuted, hints, m.Profile), width)
 }
 
@@ -199,7 +280,7 @@ func padOrTruncate(s string, targetWidth int) string {
 }
 
 func overlayHelpModal(m *Model, screen []string, width, height int) []string {
-	boxWidth := 46
+	boxWidth := 48
 	if boxWidth > width-4 {
 		boxWidth = width - 4
 	}
@@ -208,26 +289,35 @@ func overlayHelpModal(m *Model, screen []string, width, height int) []string {
 	}
 
 	boxLines := []string{
-		"┌──────────────────────────────────────────┐",
-		"│         NOVA INTERACTIVE NAVIGATOR       │",
-		"├──────────────────────────────────────────┤",
-		"│  j, ↓         Move down                  │",
-		"│  k, ↑         Move up                    │",
-		"│  Enter, l     Enter directory            │",
-		"│  h, Backspace Parent directory           │",
-		"│  /            Search / filter items      │",
-		"│  .            Toggle hidden files        │",
-		"│  g / G        Jump to top / bottom       │",
-		"│  PgUp / PgDn  Jump page up / down        │",
-		"│  ?            Toggle this help modal     │",
-		"│  Esc          Clear filter / Close help  │",
-		"│  q            Quit interactive mode      │",
-		"└──────────────────────────────────────────┘",
+		"╭──────────────────────────────────────────────╮",
+		"│         NOVA INTERACTIVE NAVIGATOR           │",
+		"├──────────────────────────────────────────────┤",
+		"│  j, ↓         Move selection down            │",
+		"│  k, ↑         Move selection up              │",
+		"│  Enter, l     Enter directory / Open         │",
+		"│  h, Backspace Go to parent directory         │",
+		"│  Space        Toggle item selection (multi)  │",
+		"│  /            Search / fuzzy filter          │",
+		"│  e            Edit file in $EDITOR           │",
+		"│  d            Delete item (with confirm)     │",
+		"│  r            Rename item                    │",
+		"│  c            Copy file path to clipboard    │",
+		"│  .            Toggle hidden / dot files      │",
+		"│  g / G        Jump to top / bottom           │",
+		"│  PgUp / PgDn  Jump page up / down            │",
+		"│  ?            Toggle this help modal         │",
+		"│  Esc          Cancel action / Clear filter   │",
+		"│  q            Quit interactive mode          │",
+		"╰──────────────────────────────────────────────╯",
 	}
 
 	if !m.UnicodeSupported {
 		for i, bl := range boxLines {
-			boxLines[i] = strings.ReplaceAll(bl, "┌", "+")
+			boxLines[i] = strings.ReplaceAll(bl, "╭", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "╮", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "╰", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "╯", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "┌", "+")
 			boxLines[i] = strings.ReplaceAll(boxLines[i], "┐", "+")
 			boxLines[i] = strings.ReplaceAll(boxLines[i], "└", "+")
 			boxLines[i] = strings.ReplaceAll(boxLines[i], "┘", "+")
