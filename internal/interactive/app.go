@@ -150,6 +150,12 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 				} else if m.RenameActive {
 					m.RenameActive = false
 					m.SetActionMessage("Rename canceled")
+				} else if m.NewFileActive {
+					m.NewFileActive = false
+					m.SetActionMessage("New file canceled")
+				} else if m.NewFolderActive {
+					m.NewFolderActive = false
+					m.SetActionMessage("New folder canceled")
 				} else if len(m.SelectedPaths) > 0 {
 					m.ClearSelection()
 					m.SetActionMessage("Selection cleared")
@@ -206,6 +212,12 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 				} else if m.RenameActive {
 					m.RenameActive = false
 					m.SetActionMessage("Rename canceled")
+				} else if m.NewFileActive {
+					m.NewFileActive = false
+					m.SetActionMessage("New file canceled")
+				} else if m.NewFolderActive {
+					m.NewFolderActive = false
+					m.SetActionMessage("New folder canceled")
 				} else if len(m.SelectedPaths) > 0 {
 					m.ClearSelection()
 					m.SetActionMessage("Selection cleared")
@@ -280,6 +292,64 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 			continue
 		}
 
+		// In New File mode
+		if m.NewFileActive {
+			if b == '\r' || b == '\n' {
+				fileName := strings.TrimSpace(m.NewFileInput)
+				if fileName != "" {
+					newPath := filepath.Join(m.CurrentDir, fileName)
+					if err := os.WriteFile(newPath, []byte(""), 0644); err != nil {
+						m.SetActionMessage("Create file failed: " + err.Error())
+					} else {
+						m.SetActionMessage("Created file: " + fileName)
+						_ = m.LoadCurrentDir()
+					}
+				} else {
+					m.SetActionMessage("New file canceled")
+				}
+				m.NewFileActive = false
+			} else if b == 127 || b == 8 { // Backspace
+				if len(m.NewFileInput) > 0 {
+					m.NewFileInput = m.NewFileInput[:len(m.NewFileInput)-1]
+				}
+			} else if b == 27 {
+				m.NewFileActive = false
+				m.SetActionMessage("New file canceled")
+			} else if b >= 32 && b <= 126 {
+				m.NewFileInput += string(b)
+			}
+			continue
+		}
+
+		// In New Folder mode
+		if m.NewFolderActive {
+			if b == '\r' || b == '\n' {
+				dirName := strings.TrimSpace(m.NewFolderInput)
+				if dirName != "" {
+					newPath := filepath.Join(m.CurrentDir, dirName)
+					if err := os.MkdirAll(newPath, 0755); err != nil {
+						m.SetActionMessage("Create folder failed: " + err.Error())
+					} else {
+						m.SetActionMessage("Created folder: " + dirName)
+						_ = m.LoadCurrentDir()
+					}
+				} else {
+					m.SetActionMessage("New folder canceled")
+				}
+				m.NewFolderActive = false
+			} else if b == 127 || b == 8 { // Backspace
+				if len(m.NewFolderInput) > 0 {
+					m.NewFolderInput = m.NewFolderInput[:len(m.NewFolderInput)-1]
+				}
+			} else if b == 27 {
+				m.NewFolderActive = false
+				m.SetActionMessage("New folder canceled")
+			} else if b >= 32 && b <= 126 {
+				m.NewFolderInput += string(b)
+			}
+			continue
+		}
+
 		// In Filter mode
 		if m.FilterActive {
 			if b == '\r' || b == '\n' {
@@ -316,6 +386,15 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 			_ = m.GoToParent()
 		case ' ':
 			m.ToggleSelect()
+		case 'n':
+			m.NewFileActive = true
+			m.NewFileInput = ""
+		case 'N':
+			m.NewFolderActive = true
+			m.NewFolderInput = ""
+		case 'p':
+			m.PreviewCollapsed = !m.PreviewCollapsed
+			m.UpdatePreview()
 		case 'c':
 			if len(m.SelectedPaths) > 0 {
 				m.SetActionMessage(fmt.Sprintf("Copied %d path(s)", len(m.SelectedPaths)))

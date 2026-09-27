@@ -37,6 +37,11 @@ type Model struct {
 	ConfirmDelete    bool
 	RenameActive     bool
 	RenameInput      string
+	NewFileActive    bool
+	NewFileInput     string
+	NewFolderActive  bool
+	NewFolderInput   string
+	PreviewCollapsed bool
 	Tick             int
 	EditorRunner     func(path string) error
 }

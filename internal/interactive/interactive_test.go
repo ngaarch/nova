@@ -424,4 +424,21 @@ func TestInteractiveActions(t *testing.T) {
 	if m.ActionMessage != "Rename canceled" {
 		t.Errorf("expected 'Rename canceled', got %q", m.ActionMessage)
 	}
+
+	// 4. Test new file creation: 'n', type 'c', 'r', 'e', 'a', 't', 'e', 'd', '.', 't', 'x', 't', Enter, 'q'
+	newFileSeq := []byte{'n', 'c', 'r', 'e', 'a', 't', 'e', 'd', '.', 't', 'x', 't', '\n', 'q'}
+	in4 := bytes.NewReader(newFileSeq)
+	var out4 bytes.Buffer
+	_ = RunLoop(m, in4, &out4)
+	if _, err := os.Stat(filepath.Join(tmpDir, "created.txt")); os.IsNotExist(err) {
+		t.Errorf("expected created.txt to be created via 'n' action")
+	}
+
+	// 5. Test preview collapse: 'p'
+	in5 := bytes.NewReader([]byte{'p', 'q'})
+	var out5 bytes.Buffer
+	_ = RunLoop(m, in5, &out5)
+	if !m.PreviewCollapsed {
+		t.Errorf("expected PreviewCollapsed to be true after pressing 'p'")
+	}
 }

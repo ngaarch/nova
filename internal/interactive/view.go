@@ -26,45 +26,53 @@ func Render(m *Model) string {
 	header := renderHeader(m, width)
 	screen = append(screen, header)
 
-	// 2. Pane column widths
-	leftWidth := width/2 - 1
-	if leftWidth < 10 {
-		leftWidth = 10
-	}
-	rightWidth := width - leftWidth - 1 // 1 column for divider
-	if rightWidth < 5 {
-		rightWidth = 5
-	}
-
-	// Pane Headers (Line 1)
-	leftHeader := renderer.PadRight("  NAME", leftWidth)
-	rightHeader := renderer.PadRight(" PREVIEW", rightWidth)
+	// 2. Pane layout
 	divChar := "│"
 	if !m.UnicodeSupported {
 		divChar = "|"
 	}
-	paneHeaderLine := m.Theme.Format(theme.RoleMuted, leftHeader+divChar+rightHeader, m.Profile)
-	screen = append(screen, paneHeaderLine)
 
-	// 3. Middle Content Rows (Lines 2 to height - 3)
 	contentRows := height - 4
 	if contentRows < 1 {
 		contentRows = 1
 	}
 
-	for r := 0; r < contentRows; r++ {
-		// Left pane cell
-		leftCell := renderLeftCell(m, r, leftWidth)
+	if m.PreviewCollapsed {
+		leftWidth := width
+		leftHeader := renderer.PadRight("  NAME", leftWidth)
+		paneHeaderLine := m.Theme.Format(theme.RoleMuted, leftHeader, m.Profile)
+		screen = append(screen, paneHeaderLine)
 
-		// Right pane cell
-		rightCell := ""
-		if r < len(m.PreviewLines) {
-			rightCell = m.PreviewLines[r]
+		for r := 0; r < contentRows; r++ {
+			leftCell := renderLeftCell(m, r, leftWidth)
+			screen = append(screen, leftCell)
 		}
-		paddedRight := padOrTruncate(rightCell, rightWidth)
+	} else {
+		leftWidth := width/2 - 1
+		if leftWidth < 10 {
+			leftWidth = 10
+		}
+		rightWidth := width - leftWidth - 1 // 1 column for divider
+		if rightWidth < 5 {
+			rightWidth = 5
+		}
 
-		rowLine := leftCell + m.Theme.Format(theme.RoleMuted, divChar, m.Profile) + paddedRight
-		screen = append(screen, rowLine)
+		// Pane Headers (Line 1)
+		leftHeader := renderer.PadRight("  NAME", leftWidth)
+		rightHeader := renderer.PadRight(" PREVIEW", rightWidth)
+		paneHeaderLine := m.Theme.Format(theme.RoleMuted, leftHeader+divChar+rightHeader, m.Profile)
+		screen = append(screen, paneHeaderLine)
+
+		for r := 0; r < contentRows; r++ {
+			leftCell := renderLeftCell(m, r, leftWidth)
+			rightCell := ""
+			if r < len(m.PreviewLines) {
+				rightCell = m.PreviewLines[r]
+			}
+			paddedRight := padOrTruncate(rightCell, rightWidth)
+			rowLine := leftCell + m.Theme.Format(theme.RoleMuted, divChar, m.Profile) + paddedRight
+			screen = append(screen, rowLine)
+		}
 	}
 
 	// 4. Status Bar (Line height - 2)
@@ -237,6 +245,16 @@ func renderStatusBar(m *Model, width int) string {
 		return padOrTruncate(m.Theme.Format(theme.RoleWarning, renamePrompt, m.Profile), width)
 	}
 
+	if m.NewFileActive {
+		filePrompt := fmt.Sprintf("  📄 New file name: %s_", m.NewFileInput)
+		return padOrTruncate(m.Theme.Format(theme.RoleWarning, filePrompt, m.Profile), width)
+	}
+
+	if m.NewFolderActive {
+		folderPrompt := fmt.Sprintf("  📁 New folder name: %s_", m.NewFolderInput)
+		return padOrTruncate(m.Theme.Format(theme.RoleWarning, folderPrompt, m.Profile), width)
+	}
+
 	if m.ActionMessage != "" && time.Since(m.ActionTime) < 3*time.Second {
 		return padOrTruncate(m.Theme.Format(theme.RoleSuccess, "  "+m.ActionMessage, m.Profile), width)
 	}
@@ -264,7 +282,7 @@ func renderStatusBar(m *Model, width int) string {
 }
 
 func renderFooter(m *Model, width int) string {
-	hints := " [j/k] Move  [Enter] Open  [h] Up  [Space] Select  [e] Edit  [d] Delete  [r] Rename  [/] Filter  [?] Help  [q] Quit"
+	hints := " [j/k] Move  [Enter] Open  [n] New File  [N] New Folder  [p] Pane  [e] Edit  [d] Delete  [r] Rename  [?] Help  [q] Quit"
 	return padOrTruncate(m.Theme.Format(theme.RoleMuted, hints, m.Profile), width)
 }
 
@@ -297,6 +315,9 @@ func overlayHelpModal(m *Model, screen []string, width, height int) []string {
 		"│  Enter, l     Enter directory / Open         │",
 		"│  h, Backspace Go to parent directory         │",
 		"│  Space        Toggle item selection (multi)  │",
+		"│  n            Create new file                │",
+		"│  N            Create new folder              │",
+		"│  p            Toggle preview pane collapse   │",
 		"│  /            Search / fuzzy filter          │",
 		"│  e            Edit file in $EDITOR           │",
 		"│  d            Delete item (with confirm)     │",
