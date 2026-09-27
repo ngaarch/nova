@@ -8,7 +8,9 @@ import (
 	"strings"
 
 	"nova/internal/commands/cat"
+	"nova/internal/commands/completion"
 	"nova/internal/commands/cp"
+	"nova/internal/commands/diff"
 	"nova/internal/commands/du"
 	"nova/internal/commands/find"
 	"nova/internal/commands/interactive"
@@ -17,7 +19,9 @@ import (
 	"nova/internal/commands/mv"
 	"nova/internal/commands/rm"
 	"nova/internal/commands/stat"
+	"nova/internal/commands/touch"
 	"nova/internal/commands/tree"
+	"nova/internal/commands/which"
 	"nova/internal/config"
 	"nova/internal/logging"
 	"nova/internal/output"
@@ -51,6 +55,10 @@ func (a *App) registerRoadmapCommands() {
 		rm.Command(),
 		mkdir.Command(),
 		interactive.Command(),
+		which.Command(),
+		touch.Command(),
+		diff.Command(),
+		completion.Command(),
 	}
 }
 

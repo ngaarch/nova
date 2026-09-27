@@ -47,8 +47,8 @@ func TestAppVersion(t *testing.T) {
 		t.Fatalf("expected ExitSuccess (0), got %d", code)
 	}
 	out := stdout.String()
-	if !strings.Contains(out, "nova 0.1.0-dev") {
-		t.Errorf("expected version 0.1.0-dev, got: %s", out)
+	if !strings.Contains(out, "nova "+Version) {
+		t.Errorf("expected version %s, got: %s", Version, out)
 	}
 }
 
@@ -65,8 +65,8 @@ func TestAppVersionJSON(t *testing.T) {
 	if err := json.Unmarshal(stdout.Bytes(), &info); err != nil {
 		t.Fatalf("failed to parse JSON version: %v; raw: %s", err, stdout.String())
 	}
-	if info.Version != "0.1.0-dev" {
-		t.Errorf("expected version 0.1.0-dev in JSON, got %q", info.Version)
+	if info.Version != Version {
+		t.Errorf("expected version %s in JSON, got %q", Version, info.Version)
 	}
 	if info.Platform == "" {
 		t.Errorf("expected non-empty platform in JSON")

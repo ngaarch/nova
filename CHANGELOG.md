@@ -6,6 +6,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-09-27
+
+### Added
+- **Executable Locator (`nova which`)**:
+  - Locate binaries in `$PATH` with symlink target resolution, file sizes, and permission strings.
+  - Multi-match support (`-a` / `--all`) to find all instances across `$PATH` directories.
+  - Silent check mode (`-s` / `--silent`) with standard exit codes for script testing.
+  - Structured `--json` and clean `--plain` pipeline output.
+
+- **File Creation & Timestamp Manager (`nova touch`)**:
+  - Create empty files and update access/modification timestamps.
+  - Parent directory auto-creation (`-p` / `--parents`) for deep nested file creation.
+  - Custom date parsing (`-d` / `--date`) supporting RFC3339, YYYY-MM-DD, and HH:MM:SS.
+  - Reference file timestamp copying (`-r` / `--reference`).
+  - No-create safeguard flag (`-c` / `--no-create`).
+
+- **Colorized File Comparator (`nova diff`)**:
+  - Pure Go unified diff engine with LCS difference calculation and configurable context lines (`-u`).
+  - Human mode with syntax-aware line numbers, green addition (`+`) and red deletion (`-`) indicators, and change summary cards.
+  - Brief difference reporting (`-q` / `--brief`) and whitespace/case ignore flags (`-w`, `-i`).
+  - Safe binary difference detection and structured JSON output.
+
+- **Shell Autocompletion Generator (`nova completion`)**:
+  - Native autocompletion scripts for `bash`, `zsh`, and `fish`.
+  - Autocomplete support for all 15 subcommands, global flags, and 11 designer themes.
+
+- **Interactive TUI Navigator Supercharge (`nova interactive`)**:
+  - New file creation shortcut (`n`) with inline filename entry and immediate reload.
+  - New folder creation shortcut (`N`) with parent directory handling.
+  - Preview pane toggle (`p`) to collapse/expand into full-width file browser mode.
+  - Multi-select (`Space`), inline rename (`r`), safe delete confirmation (`d`), and copy path toasts (`c`).
+  - Breadcrumb path navigation and real-time fuzzy search highlighting.
+
+- **5 Designer Themes & TrueColor Gradients**:
+  - `cyberpunk`, `synthwave`, `tokyo-night`, `catppuccin`, and `gruvbox`.
+  - TrueColor RGB gradient generator (`InterpolateRGB`, `FormatGradient`).
+
+- **Visual Effects & Widgets Engine (`internal/renderer`)**:
+  - Braille animated spinners (`SpinnerFrames`, `SpinnerFrame`).
+  - Dynamic Unicode progress bars (`RenderProgressBar`).
+  - 8-level sparklines generator (`RenderSparkline`).
+  - Relative human time converter (`FormatRelativeTime`).
+  - Rounded-corner card borders (`╭─╮`, `╰─╯`).
+
+---
+
 ## [1.0.0] - 2026-09-27
 
 ### Added

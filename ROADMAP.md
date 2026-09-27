@@ -15,6 +15,8 @@ PHASE 7  Interactive UX (`nova` TUI)                        [COMPLETED]
 PHASE 8  Git Awareness & Smart Features                     [COMPLETED]
 PHASE 9  Performance, Security, Accessibility & Hardening   [COMPLETED]
 PHASE 10 Release Engineering & Production Readiness         [COMPLETED]
+PHASE 11 Advanced Tooling (`which`, `touch`, `diff`, compl) [COMPLETED]
+PHASE 12 Next-Gen UX & Visual FX (Themes, Animations, TUI)  [COMPLETED]
 ```
 
 ---
@@ -242,3 +244,32 @@ PHASE 10 Release Engineering & Production Readiness         [COMPLETED]
 - All documentation complete, accurate, and hyperlinked.
 - Final quality gate in PRD §10 satisfied: Functional, Fast, Beautiful, Responsive, Safe, Tested, Documented, Maintainable.
 - Strict Stop report presented; waiting for final release authorization.
+
+---
+
+## Phase 11 — Advanced Tooling (`which`, `touch`, `diff`, `completion`)
+
+**Goal:** Broaden Nova's core utility suite with fast, high-utility commands for daily developer workflows.
+
+**Tasks:**
+- Implement `nova which`: Locate executables in `$PATH`, resolve symlink targets, format file sizes, permissions, and multi-match lookups (`-a`).
+- Implement `nova touch`: Create files and update timestamps, with `--parents` / `-p` recursive directory auto-creation, custom dates (`-d`), and reference copying (`-r`).
+- Implement `nova diff`: Pure Go unified diff engine with LCS algorithm, line numbers, green/red addition/deletion highlights, and change summary cards.
+- Implement `nova completion`: Generate native autocompletion code for `bash`, `zsh`, and `fish`.
+- Full `--plain` and `--json` support across all new commands.
+
+**Exit Gate:**
+- Unit test coverage passes across all 4 new commands.
+- Benchmark and race detection verification (`go test -race ./...`).
+
+---
+
+## Phase 12 — Next-Gen UX & Visual FX (Themes, Animations, TUI)
+
+**Goal:** Transform Nova into a visually stunning, responsive terminal environment.
+
+**Tasks:**
+- Visual Effects Engine (`internal/renderer`): Braille animated spinners, proportional gradient progress bars, 8-level sparklines, relative human timestamps, rounded card framing.
+- Designer Themes (`internal/theme`): 5 new palettes (`cyberpunk`, `synthwave`, `tokyo-night`, `catppuccin`, `gruvbox`) with TrueColor RGB gradients.
+- Interactive TUI Overhaul: Multi-select (`Space`), quick file creation (`n`), quick directory creation (`N`), preview collapse/expand toggle (`p`), inline rename (`r`), delete with confirm (`d`), copy path toast (`c`), breadcrumbs navigation, and real-time fuzzy search highlighting.
+

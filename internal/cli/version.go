@@ -7,7 +7,7 @@ import (
 
 // Version information set at build time via -ldflags.
 var (
-	Version   = "0.1.0-dev"
+	Version   = "1.2.0"
 	GitCommit = "none"
 	BuildDate = "unknown"
 )
