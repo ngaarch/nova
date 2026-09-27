@@ -25,7 +25,7 @@ type Item struct {
 func RenderHuman(ctx *command.Context, items []Item, totalBytes int64) {
 	th := ctx.Theme
 	profile := ctx.Caps.ColorProfile
-	barWidth := 16
+	barWidth := 24
 
 	for _, it := range items {
 		// Calculate percentage relative to total
@@ -37,20 +37,8 @@ func RenderHuman(ctx *command.Context, items []Item, totalBytes int64) {
 			pct = 100.0
 		}
 
-		// Build visual bar
-		filled := int((pct / 100.0) * float64(barWidth))
-		if filled > barWidth {
-			filled = barWidth
-		}
-		empty := barWidth - filled
+		progressStr := renderer.RenderProgressBar(barWidth, pct/100.0, th, profile)
 
-		barStr := strings.Repeat("█", filled) + strings.Repeat("░", empty)
-		barStyled := th.Format(theme.RoleAccent, barStr, profile)
-		if pct > 75.0 {
-			barStyled = th.Format(theme.RoleWarning, barStr, profile)
-		}
-
-		pctStr := fmt.Sprintf("%5.1f%%", pct)
 		sizeStr := fmt.Sprintf("%10s", it.HumanSize)
 		sizeStyled := th.Format(theme.RoleSize, sizeStr, profile)
 
@@ -64,7 +52,7 @@ func RenderHuman(ctx *command.Context, items []Item, totalBytes int64) {
 		}
 		pathStyled := th.Format(pathRole, name, profile)
 
-		ctx.Printer.Println(fmt.Sprintf("%s  %s  %s  %s", barStyled, pctStr, sizeStyled, pathStyled))
+		ctx.Printer.Println(fmt.Sprintf("%s  %s  %s", progressStr, sizeStyled, pathStyled))
 	}
 }
 
