@@ -292,9 +292,19 @@ func ProtectRoot(path string) bool {
 	if clean == "/" || clean == "." || clean == ".." || clean == "" {
 		return true
 	}
-	abs, err := filepath.Abs(clean)
-	if err == nil && abs == "/" {
+	vol := filepath.VolumeName(clean)
+	if vol != "" && (clean == vol || clean == vol+string(filepath.Separator)) {
 		return true
+	}
+	abs, err := filepath.Abs(clean)
+	if err == nil {
+		if abs == "/" {
+			return true
+		}
+		absVol := filepath.VolumeName(abs)
+		if absVol != "" && (abs == absVol || abs == absVol+string(filepath.Separator)) {
+			return true
+		}
 	}
 	return false
 }

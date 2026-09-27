@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"nova/internal/git"
@@ -13,6 +14,7 @@ import (
 
 // Model represents the reactive state of the interactive navigator.
 type Model struct {
+	mu               sync.RWMutex
 	CurrentDir       string
 	Entries          []Entry
 	Filtered         []Entry
@@ -29,6 +31,26 @@ type Model struct {
 	UnicodeSupported bool
 	PreviewLines     []string
 	Git              *git.RepoStatus
+}
+
+// Lock acquires exclusive write lock on model state.
+func (m *Model) Lock() {
+	m.mu.Lock()
+}
+
+// Unlock releases exclusive write lock on model state.
+func (m *Model) Unlock() {
+	m.mu.Unlock()
+}
+
+// RLock acquires shared read lock on model state.
+func (m *Model) RLock() {
+	m.mu.RLock()
+}
+
+// RUnlock releases shared read lock on model state.
+func (m *Model) RUnlock() {
+	m.mu.RUnlock()
 }
 
 // NewModel constructs an initialized Model starting at dir.
@@ -249,6 +271,8 @@ func (m *Model) ToggleHidden() error {
 
 // Resize updates the terminal dimensions.
 func (m *Model) Resize(w, h int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	if w < 20 {
 		w = 20
 	}

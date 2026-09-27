@@ -51,12 +51,23 @@ func Run(initialDir string, showHidden bool, caps terminal.Capabilities, th *the
 	signal.Notify(sigChan, syscall.SIGWINCH)
 	defer signal.Stop(sigChan)
 
+	done := make(chan struct{})
+	defer close(done)
+
 	go func() {
-		for range sigChan {
-			newW, newH := terminal.GetSize(tty, os.Getenv)
-			if newW > 0 && newH > 0 {
-				model.Resize(newW, newH)
-				_, _ = tty.WriteString(Render(model))
+		for {
+			select {
+			case <-done:
+				return
+			case <-sigChan:
+				newW, newH := terminal.GetSize(tty, os.Getenv)
+				if newW > 0 && newH > 0 {
+					model.Resize(newW, newH)
+					model.RLock()
+					frame := Render(model)
+					model.RUnlock()
+					_, _ = tty.WriteString(frame)
+				}
 			}
 		}
 	}()
@@ -70,7 +81,9 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 
 	for {
 		// Render current state
+		m.RLock()
 		frame := Render(m)
+		m.RUnlock()
 		if _, err := io.WriteString(out, frame); err != nil {
 			return err
 		}
