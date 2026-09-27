@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"nova/internal/terminal"
 	"nova/internal/theme"
@@ -46,10 +44,9 @@ func Run(initialDir string, showHidden bool, caps terminal.Capabilities, th *the
 		_, _ = tty.WriteString("\x1b[?25h\x1b[?1049l")
 	}()
 
-	// Setup SIGWINCH signal listener for dynamic terminal resizing
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGWINCH)
-	defer signal.Stop(sigChan)
+	// Setup signal listener for dynamic terminal resizing
+	sigChan, stopSignal := setupResizeSignal()
+	defer stopSignal()
 
 	done := make(chan struct{})
 	defer close(done)
