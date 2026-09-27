@@ -69,7 +69,7 @@ func PrintHelp(ctx *Context, commands []*Command) error {
 		{"    --plain", "Force unformatted, deterministic plain text"},
 		{"    --json", "Force structured JSON output"},
 		{"    --color=<mode>", "Color policy: auto, always, never"},
-		{"    --theme=<name>", "Theme: default, minimal, mono, nord, dracula, neon"},
+		{"    --theme=<name>", "Theme: default, minimal, mono, nord, dracula, neon, cyberpunk, synthwave, tokyo-night, catppuccin, gruvbox"},
 		{"    --icons=<mode>", "Icon policy: auto, always, never"},
 		{"    --debug", "Enable diagnostic debug logging to stderr"},
 	}
