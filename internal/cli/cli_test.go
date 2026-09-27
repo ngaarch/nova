@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -290,3 +291,43 @@ func TestAppExitErrorPropagation(t *testing.T) {
 		t.Errorf("expected resolution in error message, got: %s", errStr)
 	}
 }
+
+func TestAppExecuteV13Commands(t *testing.T) {
+	app := NewApp()
+	tmpDir := t.TempDir()
+
+	// 1. Test grep
+	testFile := filepath.Join(tmpDir, "greet.txt")
+	_ = os.WriteFile(testFile, []byte("hello world nova\n"), 0644)
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"grep", "--plain", "nova", tmpDir}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess (0) for grep, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "greet.txt") {
+		t.Errorf("expected greet.txt in grep output, got: %s", stdout.String())
+	}
+
+	// 2. Test sysinfo
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"sysinfo", "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess (0) for sysinfo, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "hostname=") {
+		t.Errorf("expected hostname= in sysinfo output, got: %s", stdout.String())
+	}
+
+	// 3. Test bench
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"bench", "--plain", "--size", "1", "--iterations", "20"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess (0) for bench, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "seq_write_mb_s=") {
+		t.Errorf("expected seq_write_mb_s= in bench output, got: %s", stdout.String())
+	}
+}
+

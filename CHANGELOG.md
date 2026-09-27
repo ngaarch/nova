@@ -4,6 +4,36 @@ All notable changes to `nova` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-09-27
+
+### Added
+- **Concurrent Content Searcher (`nova grep` / `nova search`)**:
+  - High-performance multi-threaded search engine with worker pools and regex support.
+  - Automatic binary file skipping with null-byte detection.
+  - Flags: `-i` (case-insensitive), `-n` (line numbers), `-c` (count only), `-l` (files with matches), `-C`/`-B`/`-A` (context lines), `--ext` (extension filtering), `--hidden` (include dotfiles), `-m` (max matches).
+  - Vibrant human presentation: neon matching substring highlights, line gutters, file header icons, and scan timing/file summary badges.
+  - Machine-ready `--plain` (`file:line:content`) and structured `--json` streaming.
+
+- **System Diagnostics & Environment Intelligence (`nova sysinfo` / `nova sys` / `nova info`)**:
+  - Hardware, Host, and Architecture breakdown (Hostname, OS, Arch, CPU cores, Go runtime version).
+  - Runtime Memory & Storage metrics: Active Goroutines, Alloc/Sys memory with gradient progress bars, GC statistics, and filesystem disk usage.
+  - Workspace Context: Git repository status (branch, clean/dirty badge) and PATH integrity analysis (identifying missing directories).
+  - Nova Environment: Terminal dimensions, TTY status, Color Profile, active theme, and icon modes.
+  - Full machine output with `--plain` key=value and `--json` serialization.
+
+- **Storage & Filesystem I/O Benchmarking (`nova bench` / `nova benchmark`)**:
+  - Sequential write and read throughput measurement (MB/s) using isolated scratch buffers.
+  - Microsecond-precision metadata stat latency distribution (min, p50, p90, p95, p99, max) with Unicode sparkline graphs.
+  - Directory walk rate testing (files/sec).
+  - Completely safe execution: runs exclusively in auto-cleaned scratch directories.
+  - Structured `--json` and tab-separated `--plain` outputs for automated CI/CD performance tracking.
+
+- **Interactive TUI Supercharging (`nova interactive`)**:
+  - **Live Theme Switcher (`t` key)**: Cycle through all 11 themes (`default`, `nord`, `dracula`, `neon`, `cyberpunk`, `synthwave`, `tokyo-night`, `catppuccin`, `gruvbox`, `minimal`, `mono`) on the fly with instant live recoloring!
+  - **Sorting Mode Toggle (`s` key)**: Cycle sorting orders instantly: Name (A-Z) -> Size (largest first) -> ModTime (newest first) -> Extension!
+  - **Hex Dump Inspector (`x` key)**: Toggle raw hexadecimal inspection with offset, byte columns, and ASCII preview.
+  - Enhanced status bar and header badges displaying current sorting order and active theme.
+
 ---
 
 ## [1.2.0] - 2026-09-27

@@ -17,6 +17,8 @@ PHASE 9  Performance, Security, Accessibility & Hardening   [COMPLETED]
 PHASE 10 Release Engineering & Production Readiness         [COMPLETED]
 PHASE 11 Advanced Tooling (`which`, `touch`, `diff`, compl) [COMPLETED]
 PHASE 12 Next-Gen UX & Visual FX (Themes, Animations, TUI)  [COMPLETED]
+PHASE 13 Content Intelligence & Search (`grep`)             [COMPLETED]
+PHASE 14 System Intelligence & Benchmarking (`sysinfo`)     [COMPLETED]
 ```
 
 ---
@@ -272,4 +274,40 @@ PHASE 12 Next-Gen UX & Visual FX (Themes, Animations, TUI)  [COMPLETED]
 - Visual Effects Engine (`internal/renderer`): Braille animated spinners, proportional gradient progress bars, 8-level sparklines, relative human timestamps, rounded card framing.
 - Designer Themes (`internal/theme`): 5 new palettes (`cyberpunk`, `synthwave`, `tokyo-night`, `catppuccin`, `gruvbox`) with TrueColor RGB gradients.
 - Interactive TUI Overhaul: Multi-select (`Space`), quick file creation (`n`), quick directory creation (`N`), preview collapse/expand toggle (`p`), inline rename (`r`), delete with confirm (`d`), copy path toast (`c`), breadcrumbs navigation, and real-time fuzzy search highlighting.
+
+---
+
+## Phase 13 — Content Intelligence & Search (`grep`)
+
+**Goal:** Provide concurrent, high-performance content searching across directories and text files.
+
+**Tasks:**
+- Implement `nova grep`: Concurrent worker pool content searcher supporting regex and string literals.
+- Binary detection: automatically skip binary files using magic bytes detection.
+- Options: case-insensitive (`-i`), line numbering (`-n`), count-only (`-c`), files with matches (`-l`), context lines (`-C`, `-B`, `-A`), extension filtering (`--ext`), hidden file search (`--hidden`).
+- Output formats: rich human dashboard with neon highlights and match summary badge, newline-delimited `--plain`, and structured `--json`.
+
+**Exit Gate:**
+- Unit test coverage passes across all flags and output formats.
+- Verified binary skipping, regex compilation, and concurrency safety.
+
+---
+
+## Phase 14 — System Intelligence & Performance Benchmarking (`sysinfo`, `bench`)
+
+**Goal:** Equip developers with system diagnostic telemetry and storage I/O benchmarking directly inside Nova.
+
+**Tasks:**
+- Implement `nova sysinfo`: Hardware, OS, Go runtime, memory allocation progress bar, disk usage, terminal dimensions, color profile, Git repository status, and PATH integrity analysis.
+- Implement `nova bench`: Sequential write and read throughput test (MB/s), stat metadata latency percentiles (min, p50, p95, p99, max in µs), directory walk rate (files/sec), with graphical bar charts and sparklines.
+- Interactive TUI Supercharging:
+  - Theme cycling in real-time (`t` key).
+  - Sorting mode cycling (`s` key): Name, Size, ModTime, Extension.
+  - Hex dump file inspection mode (`x` key).
+- Machine modes: full `--plain` and `--json` support across commands.
+
+**Exit Gate:**
+- Benchmark and diagnostics execute safely in isolated scratch environments.
+- 100% test pass across all packages with zero race conditions or vet warnings.
+
 
