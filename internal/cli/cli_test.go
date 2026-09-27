@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestAppHelp(t *testing.T) {
@@ -330,4 +331,46 @@ func TestAppExecuteV13Commands(t *testing.T) {
 		t.Errorf("expected seq_write_mb_s= in bench output, got: %s", stdout.String())
 	}
 }
+
+func TestAppExecuteV14Commands(t *testing.T) {
+	app := NewApp()
+	tmpDir := t.TempDir()
+
+	// 1. Test clean
+	junkFile := filepath.Join(tmpDir, ".DS_Store")
+	_ = os.WriteFile(junkFile, []byte("junk"), 0644)
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"clean", "--plain", tmpDir}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for clean, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "os-junk") {
+		t.Errorf("expected os-junk in clean output, got: %s", stdout.String())
+	}
+
+	// 2. Test archive pack
+	zipFile := filepath.Join(tmpDir, "test.zip")
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"archive", "pack", "-o", zipFile, junkFile}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for archive pack, got %d; stderr: %s", code, stderr.String())
+	}
+	if _, err := os.Stat(zipFile); os.IsNotExist(err) {
+		t.Errorf("expected zip archive to be created")
+	}
+
+	// 3. Test watch (trigger change in goroutine)
+	stdout.Reset()
+	stderr.Reset()
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		_ = os.WriteFile(junkFile, []byte("changed"), 0644)
+	}()
+	code = app.Run([]string{"watch", "--plain", "-n", "1", "-i", "50ms", "-d", "30ms", tmpDir}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for watch, got %d; stderr: %s", code, stderr.String())
+	}
+}
+
 

@@ -7,8 +7,10 @@ import (
 	"os"
 	"strings"
 
+	"nova/internal/commands/archive"
 	"nova/internal/commands/bench"
 	"nova/internal/commands/cat"
+	"nova/internal/commands/clean"
 	"nova/internal/commands/completion"
 	"nova/internal/commands/cp"
 	"nova/internal/commands/diff"
@@ -24,6 +26,7 @@ import (
 	"nova/internal/commands/sysinfo"
 	"nova/internal/commands/touch"
 	"nova/internal/commands/tree"
+	"nova/internal/commands/watch"
 	"nova/internal/commands/which"
 	"nova/internal/config"
 	"nova/internal/logging"
@@ -65,6 +68,9 @@ func (a *App) registerRoadmapCommands() {
 		grep.Command(),
 		sysinfo.Command(),
 		bench.Command(),
+		clean.Command(),
+		archive.Command(),
+		watch.Command(),
 	}
 }
 

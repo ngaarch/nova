@@ -2,11 +2,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.27+-00ADD8?logo=go)](go.mod)
-[![Status](https://img.shields.io/badge/Release-v1.3.0-success.svg)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/Release-v1.4.0-success.svg)](CHANGELOG.md)
 [![Dependencies](https://img.shields.io/badge/Dependencies-Zero-brightgreen.svg)](go.mod)
 [![Architecture](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](ROADMAP.md)
 
-**Nova** is a modern, fast, beautiful, and interactive terminal utility suite in Go. It rebuilds the classic Unix core utilities — `ls`, `cat`, `tree`, `find`, `stat`, `du`, `cp`, `mv`, `rm`, `mkdir`, `grep`, alongside system diagnostics (`sysinfo`), I/O benchmarks (`bench`), and an interactive dual-pane file explorer — into a unified, zero-dependency binary engineered for 2026 terminal workflows.
+**Nova** is a modern, fast, beautiful, and interactive terminal utility suite in Go. It rebuilds the classic Unix core utilities — `ls`, `cat`, `tree`, `find`, `stat`, `du`, `cp`, `mv`, `rm`, `mkdir`, `grep`, alongside workspace maintenance (`clean`), compression (`archive`), live monitor (`watch`), system diagnostics (`sysinfo`), I/O benchmarks (`bench`), and an interactive dual-pane file explorer — into a unified, zero-dependency binary engineered for 2026 terminal workflows.
 
 ```text
 FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
@@ -23,10 +23,13 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
   - **Plain Mode (`--plain`)**: Unformatted, deterministic, tab/newline-separated text for pipelines.
   - **JSON Mode (`--json`)**: Structured, schema-valid JSON for machine processing.
 - 🔍 **Concurrent Search (`grep`)**: Multi-threaded regex/literal search engine with binary detection and neon highlights.
+- 🧹 **Workspace Clean (`clean`)**: Detect and sweep OS junk (`.DS_Store`), editor backups (`*.swp`), broken symlinks, and empty dirs.
+- 📦 **Pure Go Archiver (`archive`)**: Pack, unpack, and list ZIP and TAR.GZ archives with zip-slip security guards.
+- 👀 **Live File Monitor (`watch`)**: Periodic change detector with event streaming and automatic task execution (`-e`).
 - 📊 **Telemetry & Benchmarks**: Real-time system intelligence (`sysinfo`) and isolated disk I/O throughput tests (`bench`).
 - 🌿 **Lightweight Git Awareness**: Instant `.git/HEAD` branch inspection and non-blocking status badges (`M`, `A`, `?`, `D`, `R`, `!`) with a strict 50ms timeout guard.
 - 🛡️ **Safety by Default**: Destructive operations (`rm`, `mv`, `cp`) enforce root protection (`/`, volume roots), prevent self-descendant recursion, and support `-n` / `--dry-run`.
-- 🖥️ **Interactive TUI**: Dual-pane file navigator with syntax-highlighted previews, real-time theme cycling (`t`), sorting modes (`s`), and hex dump inspector (`x`).
+- 🖥️ **Interactive TUI**: Dual-pane file navigator with syntax-highlighted previews, command palette (`:`), directory bookmarks (`b`/`B`), real-time theme cycling (`t`), sorting modes (`s`), and hex dump inspector (`x`).
 - 📦 **Zero External Runtime Dependencies**: Standard library only.
 
 ---
@@ -35,10 +38,13 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 
 | Command | Category | Description |
 |---|---|---|
-| `nova` / `nova interactive` | Explorer | Interactive dual-pane terminal file browser with live syntax previews, theme switching, and fuzzy search |
+| `nova` / `nova interactive` | Explorer | Interactive dual-pane terminal file browser with live syntax previews, command palette, bookmarks, and fuzzy search |
 | `nova ls` | Inspection | Modern directory listing with compact responsive grid, table (`-l`), sorting, and git badges |
 | `nova cat` | Viewer | Streaming file viewer with syntax highlighting, line numbers, pagination, and hex dumps (`--hex`) |
 | `nova grep` | Search | Concurrent multi-threaded regex/text content search with binary skipping and neon match highlights |
+| `nova clean` | Maintenance | Safe workspace hygiene tool detecting and removing OS junk, editor backups, test binaries, and empty dirs |
+| `nova archive` | Utility | Pure Go ZIP and TAR.GZ compressor and extractor with zip-slip protection and compression ratio metrics |
+| `nova watch` | Automation | Live filesystem monitor tracking file creations, modifications, and deletions with automated task execution |
 | `nova sysinfo` | Diagnostics | System, hardware, Go memory, disk usage, terminal capabilities, and PATH diagnostic cards |
 | `nova bench` | Benchmark | High-precision sequential read/write throughput, directory walking, and stat latency percentiles |
 | `nova tree` | Inspection | Visual directory hierarchy with depth controls (`-L`), size rollups, icons, and git status |
@@ -61,9 +67,9 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 ### Pre-Compiled Binaries
 Download the latest release tarball or zip for your operating system and architecture from the [Releases](https://github.com/ngaarch/nova/releases) page:
 
-- **Linux**: `nova_1.3.0_linux_amd64.tar.gz` | `nova_1.3.0_linux_arm64.tar.gz`
-- **macOS**: `nova_1.3.0_darwin_amd64.tar.gz` | `nova_1.3.0_darwin_arm64.tar.gz`
-- **Windows**: `nova_1.3.0_windows_amd64.zip` | `nova_1.3.0_windows_arm64.zip`
+- **Linux**: `nova_1.4.0_linux_amd64.tar.gz` | `nova_1.4.0_linux_arm64.tar.gz`
+- **macOS**: `nova_1.4.0_darwin_amd64.tar.gz` | `nova_1.4.0_darwin_arm64.tar.gz`
+- **Windows**: `nova_1.4.0_windows_amd64.zip` | `nova_1.4.0_windows_arm64.zip`
 
 Extract and place the `nova` binary into your system `PATH` (e.g., `/usr/local/bin`).
 

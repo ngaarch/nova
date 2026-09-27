@@ -4,6 +4,34 @@ All notable changes to `nova` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-09-27
+
+### Added
+- **Workspace Hygiene & Junk Cleaner (`nova clean` / `nova tidy` / `nova sweep`)**:
+  - Automatically detect and sweep OS junk (`.DS_Store`, `Thumbs.db`, `desktop.ini`), editor backup files (`*.swp`, `*~`, `*.tmp`), test binaries (`*.test`), broken symlinks, and empty directories (`--empty-dirs`).
+  - Safe by default: runs in `--dry-run` mode by default, requiring `-f` / `--force` for actual removal.
+  - Reclaimed space tracking: displays exact byte savings and percentage.
+  - Machine formats: `--plain` and structured `--json`.
+
+- **Pure Go Compression & Extraction Suite (`nova archive` / `nova pack` / `nova zip`)**:
+  - Pure Go standard library ZIP and TAR.GZ compression and extraction without external tools (`archive/zip`, `archive/tar`, `compress/gzip`).
+  - Actions: `pack` (`-o <archive>`), `unpack` (`-C <dest>`), `list`.
+  - Built-in Zip-Slip security: rigorously validates relative paths against directory traversal attacks.
+  - Compression metrics: `nova archive list` reports uncompressed size, compressed size, and compression ratio per file.
+
+- **Live Filesystem Monitor & Auto-Reloader (`nova watch` / `nova monitor`)**:
+  - Cross-platform periodic polling file monitor with modification, creation, and deletion detection.
+  - Automated command runner (`-e "<cmd>"`), debouncing (`-d`), screen clearing (`-c`), and iteration limits (`-n`).
+  - Glowing live status banner with colored event badges (`[CREATE]`, `[MODIFY]`, `[DELETE]`).
+  - Full machine streaming with newline-delimited `--plain` and JSON lines `--json`.
+
+- **Interactive TUI Supercharging (`nova interactive`)**:
+  - **Command Palette (`:` key)**: Quick command bar for executing `:theme <name>`, `:sort <mode>`, `:mkdir <name>`, `:touch <name>`, `:reload`, `:q`.
+  - **Bookmarks & Fast Jump (`b` and `B` keys)**: Bookmark favourite directories (`b`) and cycle jump (`B`) directly across projects!
+  - **Bookmark Status Counter**: Real-time `[N bm]` badge in status bar.
+
+---
+
 ## [1.3.0] - 2026-09-27
 
 ### Added

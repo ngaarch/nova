@@ -19,6 +19,8 @@ PHASE 11 Advanced Tooling (`which`, `touch`, `diff`, compl) [COMPLETED]
 PHASE 12 Next-Gen UX & Visual FX (Themes, Animations, TUI)  [COMPLETED]
 PHASE 13 Content Intelligence & Search (`grep`)             [COMPLETED]
 PHASE 14 System Intelligence & Benchmarking (`sysinfo`)     [COMPLETED]
+PHASE 15 Workspace Hygiene & Archive Packaging (`clean`)    [COMPLETED]
+PHASE 16 Live Monitoring & Task Automation (`watch`)        [COMPLETED]
 ```
 
 ---
@@ -309,5 +311,43 @@ PHASE 14 System Intelligence & Benchmarking (`sysinfo`)     [COMPLETED]
 **Exit Gate:**
 - Benchmark and diagnostics execute safely in isolated scratch environments.
 - 100% test pass across all packages with zero race conditions or vet warnings.
+
+---
+
+## Phase 15 — Workspace Hygiene & Archive Packaging (`clean`, `archive`)
+
+**Goal:** Automate workspace cleanup and provide portable, pure Go archiving and extraction capabilities.
+
+**Tasks:**
+- Implement `nova clean`: Detect OS artifacts (`.DS_Store`, `Thumbs.db`), editor junk (`*.swp`, `*~`), test binaries (`*.test`), broken symlinks, and empty directories (`--empty-dirs`).
+- Safe execution: defaults to `--dry-run` preview, requiring `-f` / `--force` for actual deletion. Protects system roots.
+- Implement `nova archive`: Pure Go ZIP and TAR.GZ compression and extraction suite (`archive/zip`, `archive/tar`, `compress/gzip`).
+- Safe extraction: zip-slip path traversal guards built-in.
+- Inspection mode: `nova archive list` reports uncompressed/compressed sizes and savings ratio.
+
+**Exit Gate:**
+- Deletion guards verified against accidental system root sweeps.
+- Zip-slip path traversal protection confirmed.
+- 100% test pass across all unit test suites.
+
+---
+
+## Phase 16 — Live Monitoring & Task Automation (`watch`)
+
+**Goal:** Provide zero-dependency filesystem monitoring and automated task triggering.
+
+**Tasks:**
+- Implement `nova watch`: Periodic fingerprint-based change detection across files and directories.
+- Detect event categories: `CREATE`, `MODIFY`, `DELETE`.
+- Options: debouncing (`-d`), interval tuning (`-i`), screen clearing (`-c`), task command execution (`-e`), iteration limiting (`-n`), extension filtering (`--ext`).
+- Interactive TUI enhancements:
+  - Command Palette (`:` key): `:theme`, `:sort`, `:mkdir`, `:touch`, `:q`.
+  - Bookmark navigation (`b` to add bookmark, `B` to cycle jumps).
+- Full `--plain` and `--json` streaming events support.
+
+**Exit Gate:**
+- Live watch loops terminate cleanly on SIGINT / SIGTERM with zero goroutine leaks.
+- 100% test pass across all 34 packages.
+
 
 
