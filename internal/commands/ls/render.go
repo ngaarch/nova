@@ -79,10 +79,23 @@ func RenderLong(ctx *command.Context, entries []filesystem.Entry, showIcons bool
 			icon = theme.LookupIcon(entry.Name, entry.EntityType, ctx.Caps.UnicodeSupported)
 		}
 
+		sizeRole := theme.RoleSize
+		if entry.IsDir {
+			sizeRole = theme.RoleMuted
+		} else if entry.Size < 10*1024 {
+			sizeRole = theme.RoleSuccess
+		} else if entry.Size < 1024*1024 {
+			sizeRole = theme.RoleInfo
+		} else if entry.Size < 50*1024*1024 {
+			sizeRole = theme.RoleWarning
+		} else {
+			sizeRole = theme.RoleError
+		}
+
 		permStr := FormatPermissions(entry.Permissions, th, prof)
 		ownerStr := th.Format(theme.RoleUser, entry.Owner, prof)
 		groupStr := th.Format(theme.RoleGroup, entry.Group, prof)
-		sizeStr := th.Format(theme.RoleSize, FormatSize(entry.Size, humanSize), prof)
+		sizeStr := th.Format(sizeRole, FormatSize(entry.Size, humanSize), prof)
 		dateStr := th.Format(theme.RoleDate, FormatTime(entry.ModTime), prof)
 		nameStr := FormatName(entry, icon, th, prof)
 
