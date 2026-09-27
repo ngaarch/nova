@@ -38,6 +38,7 @@ type Model struct {
 	RenameActive     bool
 	RenameInput      string
 	Tick             int
+	EditorRunner     func(path string) error
 }
 
 // Lock acquires exclusive write lock on model state.

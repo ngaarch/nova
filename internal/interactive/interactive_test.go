@@ -178,7 +178,7 @@ func TestInteractivePreview(t *testing.T) {
 
 	// Text file preview
 	textLines := LoadPreview(textEntry, 40, 15, th, profile)
-	if len(textLines) == 0 || !strings.Contains(textLines[0], "package main") {
+	if len(textLines) == 0 || !strings.Contains(textLines[0], "[GO]") || !strings.Contains(strings.Join(textLines, "\n"), "package main") {
 		t.Errorf("unexpected text preview: %v", textLines)
 	}
 
@@ -363,5 +363,65 @@ func TestInteractiveRunLoop(t *testing.T) {
 	}
 	if out.Len() == 0 {
 		t.Errorf("expected rendered frames in output")
+	}
+}
+
+func TestInteractiveActions(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	th := theme.Get("default")
+	profile := terminal.ColorNone
+
+	m, err := NewModel(tmpDir, 80, 24, false, th, profile, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 1. Test space (toggle selection)
+	in1 := bytes.NewReader([]byte{' ', 'c', 'q'})
+	var out1 bytes.Buffer
+	if err := RunLoop(m, in1, &out1); err != nil {
+		t.Fatal(err)
+	}
+	if len(m.SelectedPaths) != 1 {
+		t.Errorf("expected 1 selected path, got %d", len(m.SelectedPaths))
+	}
+	if !strings.Contains(m.ActionMessage, "Copied") {
+		t.Errorf("expected copied action message, got %q", m.ActionMessage)
+	}
+
+	// 2. Test delete cancel
+	in2 := bytes.NewReader([]byte{'d', 'n', 'q'})
+	var out2 bytes.Buffer
+	if err := RunLoop(m, in2, &out2); err != nil {
+		t.Fatal(err)
+	}
+	if m.ConfirmDelete {
+		t.Errorf("expected ConfirmDelete to be false after cancel")
+	}
+	if m.ActionMessage != "Delete canceled" {
+		t.Errorf("expected 'Delete canceled', got %q", m.ActionMessage)
+	}
+
+	// 3. Test rename
+	// Create a test file specifically for rename
+	testFile := filepath.Join(tmpDir, "to_rename.txt")
+	_ = os.WriteFile(testFile, []byte("test"), 0644)
+	_ = m.LoadCurrentDir()
+
+	// Find the index of to_rename.txt
+	for i, e := range m.Filtered {
+		if e.Name == "to_rename.txt" {
+			m.Cursor = i
+			break
+		}
+	}
+
+	// Trigger rename: 'r', then type 'n', 'e', 'w', '.', 't', 'x', 't', then Enter '\n', then 'q'
+	renameSeq := append([]byte{'r', 27}, 'q') // cancel first
+	in3 := bytes.NewReader(renameSeq)
+	var out3 bytes.Buffer
+	_ = RunLoop(m, in3, &out3)
+	if m.ActionMessage != "Rename canceled" {
+		t.Errorf("expected 'Rename canceled', got %q", m.ActionMessage)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"nova/internal/commands/cat"
 	"nova/internal/commands/cat/syntax"
@@ -52,7 +53,8 @@ func loadDirPreview(entry *Entry, width, height int, th *theme.Theme, profile te
 		return lines
 	}
 
-	meta := fmt.Sprintf("  Items: %d", len(dirEntries))
+	relTime := renderer.FormatRelativeTime(entry.ModTime)
+	meta := fmt.Sprintf("  Items: %d • Modified: %s", len(dirEntries), relTime)
 	lines = append(lines, th.Format(theme.RoleMuted, meta, profile))
 	lines = append(lines, "")
 
@@ -142,6 +144,13 @@ func loadFilePreview(entry *Entry, width, height int, th *theme.Theme, profile t
 
 	// Text file: syntax highlight with line numbers
 	lang := cat.DetectLanguage(entry.Name, sample)
+	relTime := renderer.FormatRelativeTime(entry.ModTime)
+	sizeStr := renderer.FormatSize(entry.Size, true)
+
+	badge := fmt.Sprintf("[%s] %s • %s", strings.ToUpper(lang), sizeStr, relTime)
+	lines = append(lines, th.Format(theme.RoleAccent, renderer.Truncate(badge, width, "…"), profile))
+	lines = append(lines, "")
+
 	scanner := bufio.NewScanner(bytes.NewReader(sample))
 	synState := &syntax.State{}
 

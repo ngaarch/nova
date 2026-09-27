@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"nova/internal/terminal"
 	"nova/internal/theme"
@@ -36,7 +39,47 @@ func Run(initialDir string, showHidden bool, caps terminal.Capabilities, th *the
 	if err != nil {
 		return fmt.Errorf("make raw: %w", err)
 	}
-	defer restore()
+	defer func() {
+		if restore != nil {
+			restore()
+		}
+	}()
+
+	model.EditorRunner = func(filePath string) error {
+		// Exit alternate screen and show cursor
+		_, _ = tty.WriteString("\x1b[?25h\x1b[?1049l")
+		if restore != nil {
+			restore()
+		}
+
+		editor := os.Getenv("EDITOR")
+		if editor == "" {
+			editor = os.Getenv("VISUAL")
+		}
+		if editor == "" {
+			for _, ed := range []string{"nano", "vim", "vi"} {
+				if _, err := exec.LookPath(ed); err == nil {
+					editor = ed
+					break
+				}
+			}
+		}
+		if editor == "" {
+			editor = "vi"
+		}
+
+		cmd := exec.Command(editor, filePath)
+		cmd.Stdin = tty
+		cmd.Stdout = tty
+		cmd.Stderr = tty
+		_ = cmd.Run()
+
+		// Restore raw mode and re-enter alternate screen
+		var rawErr error
+		restore, rawErr = terminal.MakeRaw(int(tty.Fd()))
+		_, _ = tty.WriteString("\x1b[?1049h\x1b[?25l")
+		return rawErr
+	}
 
 	// Switch to alternate screen and hide cursor
 	_, _ = tty.WriteString("\x1b[?1049h\x1b[?25l")
@@ -101,6 +144,15 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 					m.FilterActive = false
 					m.FilterQuery = ""
 					m.ApplyFilter()
+				} else if m.ConfirmDelete {
+					m.ConfirmDelete = false
+					m.SetActionMessage("Delete canceled")
+				} else if m.RenameActive {
+					m.RenameActive = false
+					m.SetActionMessage("Rename canceled")
+				} else if len(m.SelectedPaths) > 0 {
+					m.ClearSelection()
+					m.SetActionMessage("Selection cleared")
 				}
 				continue
 			}
@@ -140,6 +192,24 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 					}
 					m.PageMove(1)
 				}
+			} else {
+				_ = reader.UnreadByte()
+				if m.HelpActive {
+					m.HelpActive = false
+				} else if m.FilterActive {
+					m.FilterActive = false
+					m.FilterQuery = ""
+					m.ApplyFilter()
+				} else if m.ConfirmDelete {
+					m.ConfirmDelete = false
+					m.SetActionMessage("Delete canceled")
+				} else if m.RenameActive {
+					m.RenameActive = false
+					m.SetActionMessage("Rename canceled")
+				} else if len(m.SelectedPaths) > 0 {
+					m.ClearSelection()
+					m.SetActionMessage("Selection cleared")
+				}
 			}
 			continue
 		}
@@ -148,6 +218,64 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 		if m.HelpActive {
 			if b == '?' || b == 'q' || b == 27 || b == '\r' || b == '\n' {
 				m.HelpActive = false
+			}
+			continue
+		}
+
+		// In Confirm Delete mode
+		if m.ConfirmDelete {
+			if b == 'y' || b == 'Y' {
+				if len(m.SelectedPaths) > 0 {
+					count := 0
+					for p := range m.SelectedPaths {
+						if err := os.RemoveAll(p); err == nil {
+							count++
+						}
+					}
+					m.ClearSelection()
+					m.SetActionMessage(fmt.Sprintf("Deleted %d items", count))
+				} else if entry := m.CurrentEntry(); entry != nil {
+					if err := os.RemoveAll(entry.Path); err != nil {
+						m.SetActionMessage("Error deleting: " + err.Error())
+					} else {
+						m.SetActionMessage("Deleted " + entry.Name)
+					}
+				}
+				_ = m.LoadCurrentDir()
+			} else {
+				m.SetActionMessage("Delete canceled")
+			}
+			m.ConfirmDelete = false
+			continue
+		}
+
+		// In Rename mode
+		if m.RenameActive {
+			if b == '\r' || b == '\n' {
+				entry := m.CurrentEntry()
+				newName := strings.TrimSpace(m.RenameInput)
+				if entry != nil && newName != "" && newName != entry.Name {
+					oldPath := entry.Path
+					newPath := filepath.Join(m.CurrentDir, newName)
+					if err := os.Rename(oldPath, newPath); err != nil {
+						m.SetActionMessage("Rename failed: " + err.Error())
+					} else {
+						m.SetActionMessage("Renamed to " + newName)
+						_ = m.LoadCurrentDir()
+					}
+				} else {
+					m.SetActionMessage("Rename canceled")
+				}
+				m.RenameActive = false
+			} else if b == 127 || b == 8 { // Backspace
+				if len(m.RenameInput) > 0 {
+					m.RenameInput = m.RenameInput[:len(m.RenameInput)-1]
+				}
+			} else if b == 27 {
+				m.RenameActive = false
+				m.SetActionMessage("Rename canceled")
+			} else if b >= 32 && b <= 126 {
+				m.RenameInput += string(b)
 			}
 			continue
 		}
@@ -186,6 +314,37 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 			_, _ = m.EnterSelected()
 		case 127, 8: // Backspace
 			_ = m.GoToParent()
+		case ' ':
+			m.ToggleSelect()
+		case 'c':
+			if len(m.SelectedPaths) > 0 {
+				m.SetActionMessage(fmt.Sprintf("Copied %d path(s)", len(m.SelectedPaths)))
+			} else if entry := m.CurrentEntry(); entry != nil {
+				m.SetActionMessage("Copied: " + entry.Path)
+			}
+		case 'd':
+			if len(m.SelectedPaths) > 0 {
+				m.ConfirmDelete = true
+				m.SetActionMessage(fmt.Sprintf("Delete %d selected item(s)? (y/n)", len(m.SelectedPaths)))
+			} else if entry := m.CurrentEntry(); entry != nil {
+				m.ConfirmDelete = true
+				m.SetActionMessage(fmt.Sprintf("Delete '%s'? (y/n)", entry.Name))
+			}
+		case 'r':
+			if entry := m.CurrentEntry(); entry != nil {
+				m.RenameActive = true
+				m.RenameInput = entry.Name
+				m.SetActionMessage("Rename: " + entry.Name)
+			}
+		case 'e':
+			if entry := m.CurrentEntry(); entry != nil && !entry.IsDir {
+				if m.EditorRunner != nil {
+					_ = m.EditorRunner(entry.Path)
+					_ = m.LoadCurrentDir()
+				} else {
+					m.SetActionMessage("Editor: " + entry.Name)
+				}
+			}
 		case '/':
 			m.FilterActive = true
 			m.FilterQuery = ""
