@@ -43,13 +43,16 @@ func PrintHelp(ctx *Context, commands []*Command) error {
 
 	var b strings.Builder
 	title := th.Format(theme.RoleAccent, "nova — modern, fast, beautiful terminal utility suite", prof)
-	b.WriteString(title + "\n\n")
+	b.WriteString(title)
+	b.WriteString("\n\n")
 
-	b.WriteString(th.Format(theme.RoleAccent, "Usage:", prof) + "\n")
+	b.WriteString(th.Format(theme.RoleAccent, "Usage:", prof))
+	b.WriteString("\n")
 	b.WriteString("  nova [global-flags] <command> [args...]\n")
 	b.WriteString("  nova [global-flags]\n\n")
 
-	b.WriteString(th.Format(theme.RoleAccent, "Commands:", prof) + "\n")
+	b.WriteString(th.Format(theme.RoleAccent, "Commands:", prof))
+	b.WriteString("\n")
 	for _, cmd := range commands {
 		status := ""
 		if cmd.Run == nil {
@@ -59,7 +62,9 @@ func PrintHelp(ctx *Context, commands []*Command) error {
 		b.WriteString(fmt.Sprintf("  %s %s%s\n", cmdName, cmd.Summary, status))
 	}
 
-	b.WriteString("\n" + th.Format(theme.RoleAccent, "Global Flags:", prof) + "\n")
+	b.WriteString("\n")
+	b.WriteString(th.Format(theme.RoleAccent, "Global Flags:", prof))
+	b.WriteString("\n")
 	flags := []struct {
 		Flag string
 		Desc string
@@ -78,7 +83,9 @@ func PrintHelp(ctx *Context, commands []*Command) error {
 		b.WriteString(fmt.Sprintf("  %s %s\n", flagFormatted, f.Desc))
 	}
 
-	b.WriteString("\n" + th.Format(theme.RoleAccent, "Examples:", prof) + "\n")
+	b.WriteString("\n")
+	b.WriteString(th.Format(theme.RoleAccent, "Examples:", prof))
+	b.WriteString("\n")
 	examples := []struct {
 		Cmd     string
 		Comment string
@@ -94,7 +101,9 @@ func PrintHelp(ctx *Context, commands []*Command) error {
 		b.WriteString(fmt.Sprintf("  %s %s\n", cmdFormatted, commentFormatted))
 	}
 
-	b.WriteString("\n" + th.Format(theme.RoleMuted, "Documentation & Roadmap: https://github.com/nova-cli/nova (ROADMAP.md)", prof) + "\n")
+	b.WriteString("\n")
+	b.WriteString(th.Format(theme.RoleMuted, "Documentation & Roadmap: https://github.com/nova-cli/nova (ROADMAP.md)", prof))
+	b.WriteString("\n")
 
 	ctx.Printer.Print(b.String())
 	return nil

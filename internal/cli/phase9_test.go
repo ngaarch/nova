@@ -285,7 +285,7 @@ func BenchmarkPhase9_LsLargeDir(b *testing.B) {
 
 	app := NewApp()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = app.Run([]string{"ls", "--plain", tmpDir}, strings.NewReader(""), io.Discard, io.Discard)
 	}
 }
@@ -303,7 +303,7 @@ func BenchmarkPhase9_TreeTraversal(b *testing.B) {
 
 	app := NewApp()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = app.Run([]string{"tree", "--plain", tmpDir}, strings.NewReader(""), io.Discard, io.Discard)
 	}
 }
@@ -318,7 +318,7 @@ func BenchmarkPhase9_CatThroughput(b *testing.B) {
 	app := NewApp()
 	b.SetBytes(int64(len(oneMB)))
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = app.Run([]string{"cat", "--raw", f}, strings.NewReader(""), io.Discard, io.Discard)
 	}
 }

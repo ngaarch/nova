@@ -285,7 +285,7 @@ func (a *App) Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int 
 			fmt.Sprintf("command %q is not implemented yet (scheduled for Phase %d in ROADMAP.md)", targetCmd.Name, targetCmd.Phase),
 			"",
 			nil,
-			fmt.Sprintf("Check 'ROADMAP.md' or run 'nova --help' for available capabilities in the current release."),
+			"Check 'ROADMAP.md' or run 'nova --help' for available capabilities in the current release.",
 		)
 		ctx.Printer.Error(err.Error())
 		return ExitFailure
