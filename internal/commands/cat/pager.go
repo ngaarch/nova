@@ -311,19 +311,20 @@ func (p *Pager) renderStatusBar() string {
 
 func (p *Pager) renderHelp() string {
 	helpText := []string{
-		"  nova cat — Interactive Controls:",
-		"  ──────────────────────────────────────────",
-		"  ↑ / k           Scroll up 1 line",
-		"  ↓ / j           Scroll down 1 line",
-		"  PageDown / Space Scroll down 1 page",
-		"  PageUp / b      Scroll up 1 page",
-		"  g / Home        Jump to beginning of file",
-		"  G / End         Jump to end of file",
-		"  /               Search pattern",
-		"  n               Next search match",
-		"  N               Previous search match",
-		"  q / Ctrl+C      Exit pager",
-		"  ──────────────────────────────────────────",
+		"╭──────────────────────────────────────────────╮",
+		"│    NOVA CAT — INTERACTIVE PAGER CONTROLS     │",
+		"├──────────────────────────────────────────────┤",
+		"│  ↑ / k            Scroll up 1 line           │",
+		"│  ↓ / j            Scroll down 1 line         │",
+		"│  PageDown / Space Scroll down 1 page         │",
+		"│  PageUp / b       Scroll up 1 page           │",
+		"│  g / Home         Jump to top of file        │",
+		"│  G / End          Jump to bottom of file     │",
+		"│  /                Search pattern             │",
+		"│  n / N            Next / Prev search match   │",
+		"│  ?                Toggle this help modal     │",
+		"│  q / Ctrl+C       Exit pager                 │",
+		"╰──────────────────────────────────────────────╯",
 		"  Press any key to return to document...",
 	}
 
