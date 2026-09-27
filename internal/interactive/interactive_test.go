@@ -478,3 +478,30 @@ func TestInteractiveThemeSortHex(t *testing.T) {
 	}
 }
 
+func TestInteractivePaletteAndBookmarks(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	th := theme.Get("default")
+	m, err := NewModel(tmpDir, 80, 24, false, th, terminal.ColorTrueColor, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 1. Test Bookmark adding: 'b'
+	in1 := bytes.NewReader([]byte{'b', 'q'})
+	var out1 bytes.Buffer
+	_ = RunLoop(m, in1, &out1)
+	if len(m.Bookmarks) != 1 {
+		t.Errorf("expected 1 bookmark, got %d", len(m.Bookmarks))
+	}
+
+	// 2. Test Command Palette execution: ':', type 'r', 'e', 'l', 'o', 'a', 'd', Enter, 'q'
+	cmdSeq := append([]byte{':', 'r', 'e', 'l', 'o', 'a', 'd', '\n'}, 'q')
+	in2 := bytes.NewReader(cmdSeq)
+	var out2 bytes.Buffer
+	_ = RunLoop(m, in2, &out2)
+	if !strings.Contains(m.ActionMessage, "Reloaded") {
+		t.Errorf("expected 'Reloaded' message from :reload, got: %s", m.ActionMessage)
+	}
+}
+
+

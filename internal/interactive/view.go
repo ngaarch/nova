@@ -253,6 +253,11 @@ func renderStatusBar(m *Model, width int) string {
 		return padOrTruncate(m.Theme.Format(theme.RoleWarning, filePrompt, m.Profile), width)
 	}
 
+	if m.CommandPaletteActive {
+		cmdPrompt := fmt.Sprintf("  %s_", m.CommandInput)
+		return padOrTruncate(m.Theme.Format(theme.RoleAccent, cmdPrompt, m.Profile), width)
+	}
+
 	if m.NewFolderActive {
 		folderPrompt := fmt.Sprintf("  📁 New folder name: %s_", m.NewFolderInput)
 		return padOrTruncate(m.Theme.Format(theme.RoleWarning, folderPrompt, m.Profile), width)
@@ -280,12 +285,15 @@ func renderStatusBar(m *Model, width int) string {
 	if len(m.SelectedPaths) > 0 {
 		details += fmt.Sprintf("  [%d selected]", len(m.SelectedPaths))
 	}
+	if len(m.Bookmarks) > 0 {
+		details += fmt.Sprintf("  [%d bm]", len(m.Bookmarks))
+	}
 
 	return padOrTruncate(m.Theme.Format(theme.RoleInfo, details, m.Profile), width)
 }
 
 func renderFooter(m *Model, width int) string {
-	hints := " [j/k] Move  [Enter] Open  [s] Sort  [t] Theme  [x] Hex  [p] Pane  [n] New  [d] Del  [?] Help  [q] Quit"
+	hints := " [j/k] Move  [:] Command  [s] Sort  [t] Theme  [x] Hex  [b/B] Bookmark  [n] New  [?] Help  [q] Quit"
 	return padOrTruncate(m.Theme.Format(theme.RoleMuted, hints, m.Profile), width)
 }
 
@@ -317,6 +325,8 @@ func overlayHelpModal(m *Model, screen []string, width, height int) []string {
 		"│  k, ↑         Move selection up              │",
 		"│  Enter, l     Enter directory / Open         │",
 		"│  h, Backspace Go to parent directory         │",
+		"│  :            Open command palette (:q, :w)  │",
+		"│  b / B        Bookmark / cycle jumps         │",
 		"│  Space        Toggle item selection (multi)  │",
 		"│  s            Cycle sorting (name/size/time) │",
 		"│  t            Cycle theme in real-time       │",

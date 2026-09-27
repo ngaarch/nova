@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -43,11 +44,15 @@ type Model struct {
 	RenameInput      string
 	NewFileActive    bool
 	NewFileInput     string
-	NewFolderActive  bool
-	NewFolderInput   string
-	PreviewCollapsed bool
-	Tick             int
-	EditorRunner     func(path string) error
+	NewFolderActive      bool
+	NewFolderInput       string
+	CommandPaletteActive bool
+	CommandInput         string
+	Bookmarks            []string
+	BookmarkIndex        int
+	PreviewCollapsed     bool
+	Tick                 int
+	EditorRunner         func(path string) error
 }
 
 // Lock acquires exclusive write lock on model state.
@@ -186,6 +191,97 @@ func (m *Model) ToggleHex() {
 	} else {
 		m.SetActionMessage("Hex inspector: OFF")
 	}
+}
+
+// AddBookmark adds the current directory to the quick bookmarks list.
+func (m *Model) AddBookmark() {
+	for _, b := range m.Bookmarks {
+		if b == m.CurrentDir {
+			m.SetActionMessage("Already bookmarked: " + filepath.Base(m.CurrentDir))
+			return
+		}
+	}
+	m.Bookmarks = append(m.Bookmarks, m.CurrentDir)
+	m.SetActionMessage(fmt.Sprintf("Bookmarked [%d]: %s", len(m.Bookmarks), filepath.Base(m.CurrentDir)))
+}
+
+// JumpNextBookmark cycles navigation to the next saved bookmark.
+func (m *Model) JumpNextBookmark() {
+	if len(m.Bookmarks) == 0 {
+		m.SetActionMessage("No bookmarks saved (press 'b' to add)")
+		return
+	}
+	m.BookmarkIndex = (m.BookmarkIndex + 1) % len(m.Bookmarks)
+	target := m.Bookmarks[m.BookmarkIndex]
+	m.CurrentDir = target
+	m.FilterQuery = ""
+	m.FilterActive = false
+	m.Cursor = 0
+	m.ScrollOffset = 0
+	_ = m.LoadCurrentDir()
+	m.SetActionMessage(fmt.Sprintf("Jumped to bookmark [%d/%d]: %s", m.BookmarkIndex+1, len(m.Bookmarks), filepath.Base(target)))
+}
+
+// ExecuteCommand runs a command entered via the command palette.
+func (m *Model) ExecuteCommand(rawCmd string) error {
+	trimmed := strings.TrimSpace(rawCmd)
+	if trimmed == "" {
+		return nil
+	}
+	parts := strings.Fields(trimmed)
+	cmd := strings.ToLower(parts[0])
+
+	cleanCmd := strings.TrimPrefix(cmd, ":")
+	switch cleanCmd {
+	case "q", "quit", "exit":
+		return fmt.Errorf("QUIT")
+	case "w", "reload", "r":
+		_ = m.LoadCurrentDir()
+		m.SetActionMessage("Reloaded directory")
+	case "help", "?":
+		m.ToggleHelp()
+	case "theme":
+		if len(parts) > 1 {
+			thName := parts[1]
+			m.Theme = theme.Get(thName)
+			m.SetActionMessage("Theme set to: " + m.Theme.Name)
+			m.UpdatePreview()
+		} else {
+			m.CycleTheme()
+		}
+	case ":sort", "sort":
+		if len(parts) > 1 {
+			m.SortMode = parts[1]
+			SortEntries(m.Entries, m.SortMode)
+			m.ApplyFilter()
+			m.SetActionMessage("Sort set to: " + m.SortMode)
+		} else {
+			m.CycleSort()
+		}
+	case ":mkdir", "mkdir":
+		if len(parts) > 1 {
+			newPath := filepath.Join(m.CurrentDir, parts[1])
+			if err := os.MkdirAll(newPath, 0755); err != nil {
+				m.SetActionMessage("Error: " + err.Error())
+			} else {
+				m.SetActionMessage("Created: " + parts[1])
+				_ = m.LoadCurrentDir()
+			}
+		}
+	case ":touch", "touch":
+		if len(parts) > 1 {
+			newPath := filepath.Join(m.CurrentDir, parts[1])
+			if err := os.WriteFile(newPath, []byte(""), 0644); err != nil {
+				m.SetActionMessage("Error: " + err.Error())
+			} else {
+				m.SetActionMessage("Created: " + parts[1])
+				_ = m.LoadCurrentDir()
+			}
+		}
+	default:
+		m.SetActionMessage("Unknown command: " + parts[0])
+	}
+	return nil
 }
 
 // LoadCurrentDir reloads files in the current working directory.

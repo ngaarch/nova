@@ -350,6 +350,28 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 			continue
 		}
 
+		// In Command Palette mode
+		if m.CommandPaletteActive {
+			if b == '\r' || b == '\n' {
+				m.CommandPaletteActive = false
+				if err := m.ExecuteCommand(m.CommandInput); err != nil && err.Error() == "QUIT" {
+					return nil
+				}
+			} else if b == 127 || b == 8 { // Backspace
+				if len(m.CommandInput) > 0 {
+					m.CommandInput = m.CommandInput[:len(m.CommandInput)-1]
+				} else {
+					m.CommandPaletteActive = false
+				}
+			} else if b == 27 { // Esc
+				m.CommandPaletteActive = false
+				m.SetActionMessage("Command canceled")
+			} else if b >= 32 && b <= 126 {
+				m.CommandInput += string(b)
+			}
+			continue
+		}
+
 		// In Filter mode
 		if m.FilterActive {
 			if b == '\r' || b == '\n' {
@@ -437,6 +459,13 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 			m.CycleSort()
 		case 'x':
 			m.ToggleHex()
+		case ':':
+			m.CommandPaletteActive = true
+			m.CommandInput = ":"
+		case 'b':
+			m.AddBookmark()
+		case 'B':
+			m.JumpNextBookmark()
 		case 'g':
 			m.MoveHome()
 		case 'G':
