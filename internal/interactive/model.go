@@ -27,6 +27,10 @@ type Model struct {
 	Width            int
 	Height           int
 	Theme            *theme.Theme
+	ThemeNames       []string
+	ThemeIndex       int
+	SortMode         string // "name", "size", "time", "ext"
+	HexMode          bool
 	Profile          terminal.ColorProfile
 	UnicodeSupported bool
 	PreviewLines     []string
@@ -88,12 +92,24 @@ func NewModel(dir string, width, height int, showHidden bool, th *theme.Theme, p
 		height = 24
 	}
 
+	allThemes := theme.ListThemes()
+	thIdx := 0
+	for i, name := range allThemes {
+		if th != nil && name == th.Name {
+			thIdx = i
+			break
+		}
+	}
+
 	m := &Model{
 		CurrentDir:       absDir,
 		ShowHidden:       showHidden,
 		Width:            width,
 		Height:           height,
 		Theme:            th,
+		ThemeNames:       allThemes,
+		ThemeIndex:       thIdx,
+		SortMode:         "name",
 		Profile:          profile,
 		UnicodeSupported: unicodeSupported,
 		SelectedPaths:    make(map[string]bool),
@@ -133,9 +149,48 @@ func (m *Model) SetActionMessage(msg string) {
 	m.ActionTime = time.Now()
 }
 
+// CycleTheme switches to the next available theme in real-time.
+func (m *Model) CycleTheme() {
+	if len(m.ThemeNames) == 0 {
+		return
+	}
+	m.ThemeIndex = (m.ThemeIndex + 1) % len(m.ThemeNames)
+	m.Theme = theme.Get(m.ThemeNames[m.ThemeIndex])
+	m.SetActionMessage("Theme: " + m.Theme.Name)
+	m.UpdatePreview()
+}
+
+// CycleSort cycles through sorting modes (name -> size -> time -> ext -> name).
+func (m *Model) CycleSort() {
+	switch m.SortMode {
+	case "name":
+		m.SortMode = "size"
+	case "size":
+		m.SortMode = "time"
+	case "time":
+		m.SortMode = "ext"
+	default:
+		m.SortMode = "name"
+	}
+	SortEntries(m.Entries, m.SortMode)
+	m.ApplyFilter()
+	m.SetActionMessage("Sort: " + m.SortMode)
+}
+
+// ToggleHex toggles hex dump mode in the preview pane.
+func (m *Model) ToggleHex() {
+	m.HexMode = !m.HexMode
+	m.UpdatePreview()
+	if m.HexMode {
+		m.SetActionMessage("Hex inspector: ON")
+	} else {
+		m.SetActionMessage("Hex inspector: OFF")
+	}
+}
+
 // LoadCurrentDir reloads files in the current working directory.
 func (m *Model) LoadCurrentDir() error {
-	entries, err := ReadDir(m.CurrentDir, m.ShowHidden, m.UnicodeSupported)
+	entries, err := ReadDir(m.CurrentDir, m.ShowHidden, m.UnicodeSupported, m.SortMode)
 	if err != nil {
 		return err
 	}
@@ -333,5 +388,5 @@ func (m *Model) UpdatePreview() {
 	paneWidth := m.Width/2 - 2
 	paneHeight := m.ListHeight() + 2
 
-	m.PreviewLines = LoadPreview(entry, paneWidth, paneHeight, m.Theme, m.Profile)
+	m.PreviewLines = LoadPreview(entry, paneWidth, paneHeight, m.Theme, m.Profile, m.HexMode)
 }

@@ -137,7 +137,10 @@ func renderHeader(m *Model, width int) string {
 		gitBadge = " " + git.FormatBranch(m.Git.Branch, m.Git.IsDetached, m.UnicodeSupported, m.Theme, m.Profile)
 	}
 
-	raw := badge + crumbStr + gitBadge + itemsBadge
+	sortBadge := m.Theme.Format(theme.RoleAccent, fmt.Sprintf(" [sort:%s]", m.SortMode), m.Profile)
+	themeBadge := m.Theme.Format(theme.RoleAccent, fmt.Sprintf(" [%s]", m.Theme.Name), m.Profile)
+
+	raw := badge + crumbStr + gitBadge + itemsBadge + sortBadge + themeBadge
 	return padOrTruncate(raw, width)
 }
 
@@ -282,7 +285,7 @@ func renderStatusBar(m *Model, width int) string {
 }
 
 func renderFooter(m *Model, width int) string {
-	hints := " [j/k] Move  [Enter] Open  [n] New File  [N] New Folder  [p] Pane  [e] Edit  [d] Delete  [r] Rename  [?] Help  [q] Quit"
+	hints := " [j/k] Move  [Enter] Open  [s] Sort  [t] Theme  [x] Hex  [p] Pane  [n] New  [d] Del  [?] Help  [q] Quit"
 	return padOrTruncate(m.Theme.Format(theme.RoleMuted, hints, m.Profile), width)
 }
 
@@ -315,6 +318,9 @@ func overlayHelpModal(m *Model, screen []string, width, height int) []string {
 		"│  Enter, l     Enter directory / Open         │",
 		"│  h, Backspace Go to parent directory         │",
 		"│  Space        Toggle item selection (multi)  │",
+		"│  s            Cycle sorting (name/size/time) │",
+		"│  t            Cycle theme in real-time       │",
+		"│  x            Toggle hex dump inspection     │",
 		"│  n            Create new file                │",
 		"│  N            Create new folder              │",
 		"│  p            Toggle preview pane collapse   │",

@@ -41,7 +41,7 @@ func TestInteractiveReadDir(t *testing.T) {
 	tmpDir := setupTestDir(t)
 
 	// Without hidden files
-	entries, err := ReadDir(tmpDir, false, true)
+	entries, err := ReadDir(tmpDir, false, true, "name")
 	if err != nil {
 		t.Fatalf("ReadDir failed: %v", err)
 	}
@@ -87,7 +87,7 @@ func TestInteractiveReadDir(t *testing.T) {
 	}
 
 	// With hidden files
-	hiddenEntries, err := ReadDir(tmpDir, true, true)
+	hiddenEntries, err := ReadDir(tmpDir, true, true, "name")
 	if err != nil {
 		t.Fatalf("ReadDir with hidden failed: %v", err)
 	}
@@ -142,7 +142,7 @@ func TestInteractivePreview(t *testing.T) {
 	th := theme.Get("default")
 	profile := terminal.ColorNone
 
-	entries, err := ReadDir(tmpDir, false, true)
+	entries, err := ReadDir(tmpDir, false, true, "name")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,25 +171,25 @@ func TestInteractivePreview(t *testing.T) {
 	}
 
 	// Directory preview
-	dirLines := LoadPreview(dirEntry, 40, 15, th, profile)
+	dirLines := LoadPreview(dirEntry, 40, 15, th, profile, false)
 	if len(dirLines) == 0 || !strings.Contains(dirLines[0], "Directory: sub_a") {
 		t.Errorf("unexpected dir preview: %v", dirLines)
 	}
 
 	// Text file preview
-	textLines := LoadPreview(textEntry, 40, 15, th, profile)
+	textLines := LoadPreview(textEntry, 40, 15, th, profile, false)
 	if len(textLines) == 0 || !strings.Contains(textLines[0], "[GO]") || !strings.Contains(strings.Join(textLines, "\n"), "package main") {
 		t.Errorf("unexpected text preview: %v", textLines)
 	}
 
 	// Binary file preview
-	binLines := LoadPreview(binEntry, 40, 15, th, profile)
+	binLines := LoadPreview(binEntry, 40, 15, th, profile, false)
 	if len(binLines) == 0 || !strings.Contains(binLines[0], "Binary file") {
 		t.Errorf("unexpected binary preview: %v", binLines)
 	}
 
 	// Broken link preview
-	brokenLines := LoadPreview(brokenEntry, 40, 15, th, profile)
+	brokenLines := LoadPreview(brokenEntry, 40, 15, th, profile, false)
 	if len(brokenLines) == 0 || !strings.Contains(brokenLines[0], "Broken symlink") {
 		t.Errorf("unexpected broken link preview: %v", brokenLines)
 	}
@@ -442,3 +442,39 @@ func TestInteractiveActions(t *testing.T) {
 		t.Errorf("expected PreviewCollapsed to be true after pressing 'p'")
 	}
 }
+
+func TestInteractiveThemeSortHex(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	th := theme.Get("default")
+	m, err := NewModel(tmpDir, 80, 24, false, th, terminal.ColorTrueColor, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 1. Test Theme Cycling: 't'
+	initialTheme := m.Theme.Name
+	in1 := bytes.NewReader([]byte{'t', 'q'})
+	var out1 bytes.Buffer
+	_ = RunLoop(m, in1, &out1)
+	if m.Theme.Name == initialTheme {
+		t.Errorf("expected theme to change from %s, got %s", initialTheme, m.Theme.Name)
+	}
+
+	// 2. Test Sort Mode Cycling: 's'
+	initialSort := m.SortMode
+	in2 := bytes.NewReader([]byte{'s', 'q'})
+	var out2 bytes.Buffer
+	_ = RunLoop(m, in2, &out2)
+	if m.SortMode == initialSort {
+		t.Errorf("expected sort mode to cycle, got %s", m.SortMode)
+	}
+
+	// 3. Test Hex Toggle: 'x'
+	in3 := bytes.NewReader([]byte{'x', 'q'})
+	var out3 bytes.Buffer
+	_ = RunLoop(m, in3, &out3)
+	if !m.HexMode {
+		t.Errorf("expected HexMode to be true after pressing 'x'")
+	}
+}
+

@@ -16,7 +16,7 @@ import (
 )
 
 // LoadPreview loads and formats a preview of the specified entry to fit within width and height.
-func LoadPreview(entry *Entry, width, height int, th *theme.Theme, profile terminal.ColorProfile) []string {
+func LoadPreview(entry *Entry, width, height int, th *theme.Theme, profile terminal.ColorProfile, forceHex bool) []string {
 	if entry == nil {
 		return []string{th.Format(theme.RoleMuted, "  (No selection)", profile)}
 	}
@@ -38,7 +38,7 @@ func LoadPreview(entry *Entry, width, height int, th *theme.Theme, profile termi
 		return loadDirPreview(entry, width, height, th, profile)
 	}
 
-	return loadFilePreview(entry, width, height, th, profile)
+	return loadFilePreview(entry, width, height, th, profile, forceHex)
 }
 
 func loadDirPreview(entry *Entry, width, height int, th *theme.Theme, profile terminal.ColorProfile) []string {
@@ -95,7 +95,7 @@ func loadDirPreview(entry *Entry, width, height int, th *theme.Theme, profile te
 	return lines
 }
 
-func loadFilePreview(entry *Entry, width, height int, th *theme.Theme, profile terminal.ColorProfile) []string {
+func loadFilePreview(entry *Entry, width, height int, th *theme.Theme, profile terminal.ColorProfile, forceHex bool) []string {
 	var lines []string
 
 	// Guard against opening excessively large files
@@ -123,8 +123,12 @@ func loadFilePreview(entry *Entry, width, height int, th *theme.Theme, profile t
 		return []string{th.Format(theme.RoleMuted, "  (empty file)", profile)}
 	}
 
-	if cat.IsBinary(sample) {
-		banner := fmt.Sprintf("⚡ Binary file (%s) — Hex View", renderer.FormatSize(entry.Size, true))
+	if forceHex || cat.IsBinary(sample) {
+		modeStr := "Hex View"
+		if forceHex {
+			modeStr = "Hex Inspector (Forced)"
+		}
+		banner := fmt.Sprintf("⚡ Binary file: %s (%s) — %s", entry.Name, renderer.FormatSize(entry.Size, true), modeStr)
 		lines = append(lines, th.Format(theme.RoleAccent, renderer.Truncate(banner, width, "…"), profile))
 		lines = append(lines, "")
 

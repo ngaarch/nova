@@ -431,6 +431,12 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 			_ = m.ToggleHidden()
 		case '?':
 			m.ToggleHelp()
+		case 't':
+			m.CycleTheme()
+		case 's':
+			m.CycleSort()
+		case 'x':
+			m.ToggleHex()
 		case 'g':
 			m.MoveHome()
 		case 'G':

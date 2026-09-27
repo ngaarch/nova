@@ -13,23 +13,23 @@ import (
 
 // Entry represents a filesystem entity in the interactive browser.
 type Entry struct {
-	Name          string
-	Path          string
-	Target        string
-	IsDir         bool
-	IsSymlink     bool
-	IsBroken      bool
-	IsExec        bool
-	Size          int64
-	Mode          os.FileMode
-	ModTime       time.Time
-	Extension     string
-	Icon          string
-	GitStatus     string
+	Name      string
+	Path      string
+	Target    string
+	IsDir     bool
+	IsSymlink bool
+	IsBroken  bool
+	IsExec    bool
+	Size      int64
+	Mode      os.FileMode
+	ModTime   time.Time
+	Extension string
+	Icon      string
+	GitStatus string
 }
 
 // ReadDir reads the directory at path and returns a sorted slice of Entries.
-func ReadDir(dirPath string, showHidden bool, unicodeSupported bool) ([]Entry, error) {
+func ReadDir(dirPath string, showHidden bool, unicodeSupported bool, sortMode string) ([]Entry, error) {
 	cleanPath := filepath.Clean(dirPath)
 	dirEntries, err := os.ReadDir(cleanPath)
 	if err != nil {
@@ -90,28 +90,49 @@ func ReadDir(dirPath string, showHidden bool, unicodeSupported bool) ([]Entry, e
 		icon := theme.LookupIcon(name, entType, unicodeSupported)
 
 		entries = append(entries, Entry{
-			Name:       name,
-			Path:       fullPath,
-			Target:     target,
-			IsDir:      isDir,
-			IsSymlink:  isSymlink,
-			IsBroken:   isBroken,
-			IsExec:     isExec,
-			Size:       size,
-			Mode:       fi.Mode(),
-			ModTime:    fi.ModTime(),
-			Extension:  ext,
-			Icon:       icon,
+			Name:      name,
+			Path:      fullPath,
+			Target:    target,
+			IsDir:     isDir,
+			IsSymlink: isSymlink,
+			IsBroken:  isBroken,
+			IsExec:    isExec,
+			Size:      size,
+			Mode:      fi.Mode(),
+			ModTime:   fi.ModTime(),
+			Extension: ext,
+			Icon:      icon,
 		})
 	}
 
-	// Sort directories first, then alphabetically case-insensitive
+	SortEntries(entries, sortMode)
+	return entries, nil
+}
+
+// SortEntries sorts a slice of entries in place according to sortMode.
+func SortEntries(entries []Entry, sortMode string) {
 	sort.Slice(entries, func(i, j int) bool {
+		// Directories always float to the top
 		if entries[i].IsDir != entries[j].IsDir {
 			return entries[i].IsDir
 		}
+
+		switch sortMode {
+		case "size":
+			if entries[i].Size != entries[j].Size {
+				return entries[i].Size > entries[j].Size // Descending
+			}
+		case "time":
+			if !entries[i].ModTime.Equal(entries[j].ModTime) {
+				return entries[i].ModTime.After(entries[j].ModTime) // Newest first
+			}
+		case "ext":
+			if entries[i].Extension != entries[j].Extension {
+				return entries[i].Extension < entries[j].Extension
+			}
+		}
+
+		// Fallback or default "name": alphabetical case-insensitive
 		return strings.ToLower(entries[i].Name) < strings.ToLower(entries[j].Name)
 	})
-
-	return entries, nil
 }
