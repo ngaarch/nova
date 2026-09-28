@@ -45,7 +45,7 @@ type Info struct {
 func Command() *command.Command {
 	return &command.Command{
 		Name:        "sysinfo",
-		Aliases:     []string{"sys", "info", "env"},
+		Aliases:     []string{"sys", "info", "system"},
 		Summary:     "Display system, environment, runtime, and terminal diagnostic dashboard",
 		Usage:       "nova sysinfo [flags]",
 		Description: "Inspect hardware, operating system, Go runtime, memory, storage, and Nova environment.",
