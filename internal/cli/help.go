@@ -64,22 +64,22 @@ func PrintHelp(ctx *Context, commands []*Command) error {
 		{
 			Name:     "Files & Navigation",
 			Icon:     "📁",
-			Commands: []string{"ls", "tree", "cat", "head", "tail", "grep", "find", "stat", "size", "clean"},
+			Commands: []string{"interactive", "ls", "tree", "cat", "grep", "find", "stat", "du", "cp", "mv", "rm", "mkdir", "touch", "which", "clean"},
 		},
 		{
 			Name:     "Network & Security",
 			Icon:     "🔒",
-			Commands: []string{"ping", "dig", "port", "curl", "cert", "scan"},
+			Commands: []string{"net", "http", "serve", "cert", "scan", "qr"},
 		},
 		{
 			Name:     "System & Diagnostics",
 			Icon:     "⚡",
-			Commands: []string{"sysinfo", "ps", "kill", "top", "bench", "stress", "watch"},
+			Commands: []string{"sysinfo", "top", "bench", "stress", "watch"},
 		},
 		{
 			Name:     "Developer & Utilities",
 			Icon:     "🛠️",
-			Commands: []string{"git", "diff", "env", "json", "yaml", "calc", "hash", "uuid", "base64", "archive", "md", "note", "color"},
+			Commands: []string{"git", "diff", "env", "calc", "hash", "hex", "archive", "run", "history", "md", "note", "color", "completion"},
 		},
 	}
 
