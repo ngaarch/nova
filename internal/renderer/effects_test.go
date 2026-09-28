@@ -83,3 +83,23 @@ func TestRenderCard(t *testing.T) {
 		t.Errorf("card bottom border mismatch: %q", card[3])
 	}
 }
+
+func TestInterpolateRGBAndGradient(t *testing.T) {
+	c1 := theme.HexRGB(0x000000)
+	c2 := theme.HexRGB(0xFFFFFF)
+
+	mid := InterpolateRGB(c1, c2, 0.5)
+	if mid.R != 127 || mid.G != 127 || mid.B != 127 {
+		t.Errorf("expected ~127, got (%d, %d, %d)", mid.R, mid.G, mid.B)
+	}
+
+	gradNone := RenderGradientText("NOVA SUITE", c1, c2, true, terminal.ColorNone)
+	if gradNone != "NOVA SUITE" {
+		t.Errorf("expected plain text when ColorNone, got %q", gradNone)
+	}
+
+	gradColor := RenderGradientText("NOVA SUITE", c1, c2, true, terminal.ColorTrueColor)
+	if !strings.Contains(gradColor, "\x1b[") {
+		t.Errorf("expected ANSI escapes for gradient text, got %q", gradColor)
+	}
+}

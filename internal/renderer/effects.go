@@ -258,3 +258,41 @@ func RenderCard(title string, lines []string, width int, borderStyle theme.Style
 
 	return output
 }
+
+// InterpolateRGB smoothly blends two RGB colors based on factor t (0.0 to 1.0).
+func InterpolateRGB(start, end theme.RGB, t float64) theme.RGB {
+	if t <= 0 {
+		return start
+	}
+	if t >= 1 {
+		return end
+	}
+	r := uint8(float64(start.R) + t*float64(int(end.R)-int(start.R)))
+	g := uint8(float64(start.G) + t*float64(int(end.G)-int(start.G)))
+	b := uint8(float64(start.B) + t*float64(int(end.B)-int(start.B)))
+	return theme.RGB{R: r, G: g, B: b}
+}
+
+// RenderGradientText renders text smoothly transitioning across a linear RGB color gradient.
+func RenderGradientText(text string, start, end theme.RGB, bold bool, profile terminal.ColorProfile) string {
+	if text == "" || profile == terminal.ColorNone {
+		return text
+	}
+
+	runes := []rune(text)
+	total := len(runes)
+	if total <= 1 {
+		c := start
+		st := theme.Style{Fg: &c, Bold: bold}
+		return st.Format(text, profile)
+	}
+
+	var sb strings.Builder
+	for i, r := range runes {
+		t := float64(i) / float64(total-1)
+		col := InterpolateRGB(start, end, t)
+		st := theme.Style{Fg: &col, Bold: bold}
+		sb.WriteString(st.Format(string(r), profile))
+	}
+	return sb.String()
+}

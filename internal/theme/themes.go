@@ -386,6 +386,80 @@ var (
 			RolePermExec:  {Fg: rgbPtr(HexRGB(0xB8BB26)), Bold: true},
 		},
 	}
+
+	ThemeSolarized = &Theme{
+		Name: "solarized",
+		Styles: map[Role]Style{
+			RoleDirectory:     {Fg: rgbPtr(HexRGB(0x268BD2)), Bold: true},
+			RoleRegularFile:   {Fg: rgbPtr(HexRGB(0x93A1A1))},
+			RoleExecutable:    {Fg: rgbPtr(HexRGB(0x859900)), Bold: true},
+			RoleSymlink:       {Fg: rgbPtr(HexRGB(0x2AA198)), Italic: true},
+			RoleBrokenSymlink: {Fg: rgbPtr(HexRGB(0xDC322F)), Bold: true, Underline: true},
+			RolePipe:          {Fg: rgbPtr(HexRGB(0xCB4B16))},
+			RoleSocket:        {Fg: rgbPtr(HexRGB(0x6C71C4)), Bold: true},
+			RoleDevice:        {Fg: rgbPtr(HexRGB(0xB58900))},
+			RoleArchive:       {Fg: rgbPtr(HexRGB(0xDC322F))},
+			RoleCode:          {Fg: rgbPtr(HexRGB(0x268BD2))},
+			RoleDocument:      {Fg: rgbPtr(HexRGB(0xB58900))},
+			RoleImage:         {Fg: rgbPtr(HexRGB(0xD33682))},
+			RoleAudio:         {Fg: rgbPtr(HexRGB(0x2AA198))},
+			RoleVideo:         {Fg: rgbPtr(HexRGB(0x859900))},
+			RoleHidden:        {Fg: rgbPtr(HexRGB(0x586E75))},
+
+			RoleSuccess:   {Fg: rgbPtr(HexRGB(0x859900)), Bold: true},
+			RoleWarning:   {Fg: rgbPtr(HexRGB(0xB58900)), Bold: true},
+			RoleError:     {Fg: rgbPtr(HexRGB(0xDC322F)), Bold: true},
+			RoleInfo:      {Fg: rgbPtr(HexRGB(0x268BD2))},
+			RoleMuted:     {Fg: rgbPtr(HexRGB(0x586E75))},
+			RoleSelection: {Fg: rgbPtr(HexRGB(0xFDF6E3)), Bg: rgbPtr(HexRGB(0x073642)), Bold: true},
+			RoleAccent:    {Fg: rgbPtr(HexRGB(0x2AA198)), Bold: true},
+
+			RoleSize:      {Fg: rgbPtr(HexRGB(0x859900))},
+			RoleDate:      {Fg: rgbPtr(HexRGB(0x2AA198))},
+			RoleUser:      {Fg: rgbPtr(HexRGB(0xB58900))},
+			RoleGroup:     {Fg: rgbPtr(HexRGB(0xCB4B16))},
+			RolePermRead:  {Fg: rgbPtr(HexRGB(0xB58900))},
+			RolePermWrite: {Fg: rgbPtr(HexRGB(0xDC322F))},
+			RolePermExec:  {Fg: rgbPtr(HexRGB(0x859900)), Bold: true},
+		},
+	}
+
+	ThemeRosePine = &Theme{
+		Name: "rose-pine",
+		Styles: map[Role]Style{
+			RoleDirectory:     {Fg: rgbPtr(HexRGB(0x9CCFD8)), Bold: true},
+			RoleRegularFile:   {Fg: rgbPtr(HexRGB(0xE0DEF4))},
+			RoleExecutable:    {Fg: rgbPtr(HexRGB(0x31748F)), Bold: true},
+			RoleSymlink:       {Fg: rgbPtr(HexRGB(0xEBBCBA)), Italic: true},
+			RoleBrokenSymlink: {Fg: rgbPtr(HexRGB(0xEB6F92)), Bold: true, Underline: true},
+			RolePipe:          {Fg: rgbPtr(HexRGB(0xF6C177))},
+			RoleSocket:        {Fg: rgbPtr(HexRGB(0xC4A7E7)), Bold: true},
+			RoleDevice:        {Fg: rgbPtr(HexRGB(0xF6C177))},
+			RoleArchive:       {Fg: rgbPtr(HexRGB(0xEB6F92))},
+			RoleCode:          {Fg: rgbPtr(HexRGB(0x9CCFD8))},
+			RoleDocument:      {Fg: rgbPtr(HexRGB(0xF6C177))},
+			RoleImage:         {Fg: rgbPtr(HexRGB(0xC4A7E7))},
+			RoleAudio:         {Fg: rgbPtr(HexRGB(0xEBBCBA))},
+			RoleVideo:         {Fg: rgbPtr(HexRGB(0x31748F))},
+			RoleHidden:        {Fg: rgbPtr(HexRGB(0x6E6A86))},
+
+			RoleSuccess:   {Fg: rgbPtr(HexRGB(0x31748F)), Bold: true},
+			RoleWarning:   {Fg: rgbPtr(HexRGB(0xF6C177)), Bold: true},
+			RoleError:     {Fg: rgbPtr(HexRGB(0xEB6F92)), Bold: true},
+			RoleInfo:      {Fg: rgbPtr(HexRGB(0x9CCFD8))},
+			RoleMuted:     {Fg: rgbPtr(HexRGB(0x6E6A86))},
+			RoleSelection: {Fg: rgbPtr(HexRGB(0xE0DEF4)), Bg: rgbPtr(HexRGB(0x26233A)), Bold: true},
+			RoleAccent:    {Fg: rgbPtr(HexRGB(0xC4A7E7)), Bold: true},
+
+			RoleSize:      {Fg: rgbPtr(HexRGB(0x31748F))},
+			RoleDate:      {Fg: rgbPtr(HexRGB(0xEBBCBA))},
+			RoleUser:      {Fg: rgbPtr(HexRGB(0xF6C177))},
+			RoleGroup:     {Fg: rgbPtr(HexRGB(0xEB6F92))},
+			RolePermRead:  {Fg: rgbPtr(HexRGB(0xF6C177))},
+			RolePermWrite: {Fg: rgbPtr(HexRGB(0xEB6F92))},
+			RolePermExec:  {Fg: rgbPtr(HexRGB(0x31748F)), Bold: true},
+		},
+	}
 )
 
 // Get returns the Theme with the given name, falling back to ThemeDefault if not found.
@@ -411,6 +485,10 @@ func Get(name string) *Theme {
 		return ThemeCatppuccin
 	case "gruvbox", "gruvbox-dark":
 		return ThemeGruvbox
+	case "solarized", "solarized-dark":
+		return ThemeSolarized
+	case "rose-pine", "rosepine":
+		return ThemeRosePine
 	default:
 		return ThemeDefault
 	}
@@ -428,6 +506,8 @@ func ListThemes() []string {
 		"tokyo-night",
 		"catppuccin",
 		"gruvbox",
+		"solarized",
+		"rose-pine",
 		"minimal",
 		"mono",
 	}
