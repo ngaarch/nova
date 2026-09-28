@@ -439,6 +439,65 @@ PHASE 20 Git Productivity Dashboard & Terminal QR (`git`, `qr`) [COMPLETED]
 - 100% test pass across git, qr, and interactive diff tests.
 - QR codes verified scannable and format compliant.
 
+---
+
+## Phase 21 — Real-Time Process & Resource Monitor (`top`, `proc`)
+
+**Goal:** Provide full system resource inspection and process monitoring with zero dependencies.
+
+**Tasks:**
+- Implement `nova top` (aliases: `proc`, `ps`, `monitor`):
+  - Reads `/proc` on Linux with portable fallback for CPU%, RSS, VSize, process states (R, S, D, Z), load average, and uptime.
+  - Color gradient progress bars for CPU and Memory utilization.
+  - Filtering (`-f`), sorting (`-s cpu|mem|pid|name`), and output limits (`-n`).
+  - Process signal delivery (`-k` / `--kill`).
+  - Real-time continuous mode (`-w` / `--live`) and deterministic `--plain` / `--json` streams.
+
+**Exit Gate:**
+- Verified on Linux `/proc` and portable environments.
+- 100% unit test coverage across all metrics and rendering formats.
+
+---
+
+## Phase 22 — Network Diagnostics & Port Scanner (`net`, `ping`)
+
+**Goal:** Provide low-latency network telemetry, TCP ping, port scanning, and DNS record auditing.
+
+**Tasks:**
+- Implement `nova net` (aliases: `ping`, `latency`, `portscan`):
+  - High-precision TCP ping with microsecond resolution, visual sparkline, and jitter metrics.
+  - Concurrent TCP port scanner with service name heuristics and open/closed/timeout badges.
+  - DNS resolution query inspecting A, AAAA, CNAME, MX, and TXT records.
+  - Fully automation-compatible with `--plain` and structured `--json`.
+
+**Exit Gate:**
+- 100% test pass against local test servers and DNS lookups.
+- Zero external dependencies.
+
+---
+
+## Phase 23 — Smart Task Runner & TUI Fuzzy Navigation (`run`, TUI v1.7)
+
+**Goal:** Orchestrate project tasks automatically and provide fast fuzzy navigation inside the interactive TUI.
+
+**Tasks:**
+- Implement `nova run` (aliases: `task`, `exec`):
+  - Automatic task discovery from `package.json`, `Makefile`, `go.mod`, `Cargo.toml`, `Taskfile.yml`.
+  - Visual card grid displaying all detected workspace tasks and commands.
+  - Direct task execution with real-time timers and exit status indicators.
+  - Automatic workspace root discovery and zero-shell security compliance.
+- Interactive TUI Supercharging:
+  - Fuzzy File Finder overlay modal (`f` or `Ctrl+P`) with real-time match highlighting.
+  - Visual bookmark indicators (`🔖`) in directory tree.
+  - TrueColor linear gradient title banner.
+  - Palette commands: `:find`, `:bookmark`, `:jump`, `:top`, `:net`, `:run`.
+- Themes Expansion:
+  - Built-in `solarized` and `rose-pine` themes.
+
+**Exit Gate:**
+- 100% test pass across all packages and clean security audit.
+- Release version `1.7.0` verified and deployed.
+
 
 
 

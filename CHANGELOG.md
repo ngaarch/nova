@@ -4,6 +4,41 @@ All notable changes to `nova` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-09-28
+
+### Added
+- **System Resource Telemetry & Process Monitor (`nova top` / `nova proc` / `nova ps` / `nova monitor`)**:
+  - Real-time CPU, memory, load average (1m, 5m, 15m), and system uptime inspection.
+  - CPU & Memory progress bars with graduated color ramps (green -> yellow -> red).
+  - Detailed process table: PID, User, State (Running `R`, Sleeping `S`, Disk `D`, Zombie `Z`), CPU%, Mem%, RSS, Threads, Command.
+  - Process filtering (`-f` / `--filter`), sorting (`-s cpu|mem|pid|name`), and output limits (`-n`).
+  - Process termination & signal delivery (`-k` / `--kill <pid>`, `--signal <num>`).
+  - Continuous live refresh mode (`-w` / `--live`) and deterministic `--plain` / `--json` streams.
+
+- **Network Latency Telemetry & Port Scanner (`nova net` / `nova ping` / `nova latency` / `nova portscan`)**:
+  - High-precision TCP ping with microsecond resolution, visual latency sparkline (` ▂▃▅▆▇█`), packet loss percentage, and min/avg/max/jitter metrics.
+  - Fast concurrent port scanner (`nova net scan <host> -p 22,80,443,...`) with service name heuristics and open/closed/timeout status.
+  - DNS resolution inspector (`nova net dns <domain>`) querying A, AAAA, CNAME, MX, and TXT records.
+  - Automation friendly with `--plain` and structured `--json`.
+
+- **Smart Task Runner & Workspace Automator (`nova run` / `nova task` / `nova exec`)**:
+  - Automatic workspace task discovery across `package.json` (npm/pnpm/yarn/bun scripts), `Makefile` (targets), `go.mod` (Go toolchain tasks), `Cargo.toml` (Cargo tasks), and `Taskfile.yml`.
+  - Visual task card grid displaying available tasks, detected runtimes, commands, and descriptions.
+  - Direct execution with live task launch banner, execution duration timers, and exit status indicators.
+  - Automatic parent workspace root traversal and zero-shell security compliance.
+
+- **Interactive TUI Supercharging (TUI v1.7)**:
+  - **Fuzzy File Finder Overlay (`f` or `Ctrl+P`)**: Fast recursive fuzzy search modal with instant character match highlighting and direct jump to matching items.
+  - **Visual Bookmark Markers (`🔖`)**: Bookmarked files and directories now display prominent visual bookmark flags in the explorer tree.
+  - **TrueColor Linear Gradient Header**: Dynamic 24-bit RGB linear gradient title banner.
+  - **Command Palette Expansion**: Added `:find`, `:bookmark`, `:jump`, `:top`, `:net`, `:run`.
+
+- **Theme Engine Expansion**:
+  - Added built-in `solarized` (Solarized Dark) and `rose-pine` (Rosé Pine) themes.
+  - Added RGB linear gradient text interpolation (`RenderGradientText`, `InterpolateRGB`).
+
+---
+
 ## [1.6.0] - 2026-09-28
 
 ### Added
