@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.27+-00ADD8?logo=go)](go.mod)
-[![Status](https://img.shields.io/badge/Release-v1.4.0-success.svg)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/Release-v1.8.0-success.svg)](CHANGELOG.md)
 [![Dependencies](https://img.shields.io/badge/Dependencies-Zero-brightgreen.svg)](go.mod)
 [![Architecture](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](ROADMAP.md)
 
@@ -23,13 +23,16 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
   - **Plain Mode (`--plain`)**: Unformatted, deterministic, tab/newline-separated text for pipelines.
   - **JSON Mode (`--json`)**: Structured, schema-valid JSON for machine processing.
 - 🔍 **Concurrent Search (`grep`)**: Multi-threaded regex/literal search engine with binary detection and neon highlights.
+- 🧮 **Terminal Calculator (`calc`)**: Scientific, programmer, bitwise, and human byte-unit arithmetic with multi-base breakdown.
+- 📜 **Shell Intelligence (`history`)**: Multi-shell history analytics, horizontal distribution bar charts, and category breakdowns.
+- 🌐 **Web Server (`serve`)**: Zero-config static HTTP file server with SPA fallback routing, mobile QR pairing, and live request logging.
 - 🧹 **Workspace Clean (`clean`)**: Detect and sweep OS junk (`.DS_Store`), editor backups (`*.swp`), broken symlinks, and empty dirs.
 - 📦 **Pure Go Archiver (`archive`)**: Pack, unpack, and list ZIP and TAR.GZ archives with zip-slip security guards.
 - 👀 **Live File Monitor (`watch`)**: Periodic change detector with event streaming and automatic task execution (`-e`).
 - 📊 **Telemetry & Benchmarks**: Real-time system intelligence (`sysinfo`) and isolated disk I/O throughput tests (`bench`).
 - 🌿 **Lightweight Git Awareness**: Instant `.git/HEAD` branch inspection and non-blocking status badges (`M`, `A`, `?`, `D`, `R`, `!`) with a strict 50ms timeout guard.
 - 🛡️ **Safety by Default**: Destructive operations (`rm`, `mv`, `cp`) enforce root protection (`/`, volume roots), prevent self-descendant recursion, and support `-n` / `--dry-run`.
-- 🖥️ **Interactive TUI**: Dual-pane file navigator with syntax-highlighted previews, command palette (`:`), directory bookmarks (`b`/`B`), real-time theme cycling (`t`), sorting modes (`s`), and hex dump inspector (`x`).
+- 🖥️ **Interactive TUI**: Dual-pane file navigator with syntax-highlighted previews, zip archive preview, inline `:calc` evaluator, command palette (`:`), directory bookmarks (`b`/`B`), real-time theme cycling (`t`), sorting modes (`s`), and hex dump inspector (`x`).
 - 📦 **Zero External Runtime Dependencies**: Standard library only.
 
 ---
@@ -37,10 +40,14 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 ## Command Reference
 
 | Command | Category | Description |
-| `nova` / `nova interactive` | Explorer | Interactive dual-pane terminal file browser with live syntax previews, git diffs (`D`), fuzzy finder (`Ctrl+P`), bookmarks, and palette |
+|---|---|---|
+| `nova` / `nova interactive` | Explorer | Interactive dual-pane terminal file browser with live syntax previews, archive inspection, git diffs (`D`), fuzzy finder (`Ctrl+P`), bookmarks, and palette |
 | `nova ls` | Inspection | Modern directory listing with compact responsive grid, table (`-l`), sorting, and git badges |
 | `nova cat` | Viewer | Streaming file viewer with syntax highlighting, line numbers, pagination, and hex dumps (`--hex`) |
 | `nova grep` | Search | Concurrent multi-threaded regex/text content search with binary skipping and neon match highlights |
+| `nova calc` | Utility | Scientific, programmer, and byte-unit terminal calculator with multi-base breakdown (Hex, Bin, Oct, Bytes) |
+| `nova history` | Analytics | Shell history intelligence & command productivity analytics with horizontal bar charts and categorization |
+| `nova serve` | Network | Zero-config static HTTP web server with auto-failover ports, SPA routing, terminal QR codes, and live logs |
 | `nova top` | Telemetry | Real-time system resource monitor, CPU/Memory progress bars, load average, and active process table |
 | `nova net` | Network | High-precision TCP ping latency diagnostics, visual sparklines, concurrent port scanner, and DNS inspection |
 | `nova run` | Automation | Smart project task runner with auto-discovery across `package.json`, `Makefile`, `go.mod`, `Cargo.toml` |
@@ -75,9 +82,9 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 ### Pre-Compiled Binaries
 Download the latest release tarball or zip for your operating system and architecture from the [Releases](https://github.com/ngaarch/nova/releases) page:
 
-- **Linux**: `nova_1.7.0_linux_amd64.tar.gz` | `nova_1.7.0_linux_arm64.tar.gz`
-- **macOS**: `nova_1.7.0_darwin_amd64.tar.gz` | `nova_1.7.0_darwin_arm64.tar.gz`
-- **Windows**: `nova_1.7.0_windows_amd64.zip` | `nova_1.7.0_windows_arm64.zip`
+- **Linux**: `nova_1.8.0_linux_amd64.tar.gz` | `nova_1.8.0_linux_arm64.tar.gz`
+- **macOS**: `nova_1.8.0_darwin_amd64.tar.gz` | `nova_1.8.0_darwin_arm64.tar.gz`
+- **Windows**: `nova_1.8.0_windows_amd64.zip` | `nova_1.8.0_windows_arm64.zip`
 
 Extract and place the `nova` binary into your system `PATH` (e.g., `/usr/local/bin`).
 
@@ -177,11 +184,51 @@ Run `nova` without arguments in an interactive terminal to enter the dual-pane n
 | `Enter` / `l` | Open selected directory or preview |
 | `Backspace` / `h` | Go up to parent directory |
 | `/` | Real-time fuzzy filter query |
+| `f` / `Ctrl+P` | Recursive fuzzy file finder modal |
 | `.` | Toggle visibility of hidden files |
+| `b` / `B` | Add bookmark / cycle bookmarked directories |
+| `x` | Toggle hex dump inspector |
+| `D` | Toggle git diff preview |
+| `:` | Open command palette (e.g. `:calc 2^16`, `:theme dracula`, `:sort size`) |
 | `g` / `G` | Jump to top / bottom |
 | `PgUp` / `PgDn` | Scroll preview / page |
 | `?` | Toggle modal help overlay |
 | `q` / `Ctrl+C` | Exit interactive mode |
+
+### 8. Terminal Calculator (`nova calc`)
+```bash
+# Arithmetic & scientific calculations
+nova calc "2^16 + 1024 * 8"
+nova calc "sqrt(144) + sin(pi / 2)"
+
+# Byte units & bitwise operations
+nova calc "4GB / 256MB"
+nova calc "0xFF00 & 0x0FF0"
+
+# Shell pipelines & JSON output
+nova calc "2^32 - 1" --plain
+nova calc "100MB / 1.5" --json
+```
+
+### 9. Shell History Analytics (`nova history`)
+```bash
+# Top most used commands with horizontal distribution charts
+nova history
+nova history --top 20
+
+# Filter command usage
+nova history -q "git"
+nova history -q "docker"
+```
+
+### 10. Development Web Server (`nova serve`)
+```bash
+# Serve current directory on port 8080 with auto-failover & QR code
+nova serve
+
+# Serve single page application (SPA) with CORS
+nova serve ./dist --port 3000 --spa --cors
+```
 
 ---
 

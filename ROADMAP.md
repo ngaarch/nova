@@ -498,6 +498,64 @@ PHASE 20 Git Productivity Dashboard & Terminal QR (`git`, `qr`) [COMPLETED]
 - 100% test pass across all packages and clean security audit.
 - Release version `1.7.0` verified and deployed.
 
+---
+
+## Phase 24 — Scientific & Programmer Terminal Calculator (`calc`, `math`, `eval`)
+
+**Goal:** Provide full algebraic, scientific, bitwise, and multi-base programmer arithmetic directly in the terminal.
+
+**Tasks:**
+- Implement `nova calc` (aliases: `expr`, `math`, `eval`):
+  - Pure Go recursive descent parser supporting `+`, `-`, `*`, `/`, `%`, `^`, bitwise (`<<`, `>>`, `&`, `|`, `^`, `~`).
+  - Mathematical functions (`sqrt`, `abs`, `round`, `floor`, `ceil`, `sin`, `cos`, `tan`, `log`, `log2`, `log10`, `pow`, `fact`) and constants (`pi`, `e`, `tau`, `phi`).
+  - Unit capacity scaling (`B`, `KB`, `MB`, `GB`, `TB`, `KiB`, `MiB`, `GiB`).
+  - Multi-base breakdown: Decimal, Hexadecimal, Binary, Octal, Human-readable bytes.
+  - Formatted dashboard output, precision control (`-p`), and raw pipeline `--plain` / structured `--json`.
+
+**Exit Gate:**
+- Comprehensive unit tests covering syntax, precedence, division-by-zero guards, bitwise shifts, and multi-base rendering.
+- 100% test pass.
+
+---
+
+## Phase 25 — Shell History Intelligence & Command Analytics (`history`, `hist`)
+
+**Goal:** Parse shell history across modern shells and visualize productivity analytics with zero dependencies.
+
+**Tasks:**
+- Implement `nova history` (aliases: `hist`, `analytics`):
+  - Multi-shell parser: Bash (`~/.bash_history`), Zsh extended history (`~/.zsh_history`), and Fish (`~/.local/share/fish/fish_history`).
+  - Command distribution breakdown with horizontal ANSI bar charts and percentage calculations.
+  - Productivity categorization (Git, Development, System, Containers, Network, Editors, Shell utilities).
+  - Search queries (`-q`), top limits (`-n`), custom file overrides (`-f`), and pipeline `--plain` / structured `--json`.
+
+**Exit Gate:**
+- Unit tests covering Bash, Zsh extended timestamp formats, and Fish history files.
+- 100% test pass.
+
+---
+
+## Phase 26 — Zero-Config Web Server & TUI Archive Previews (`serve`, TUI v1.8)
+
+**Goal:** Deliver instant static file serving with QR code pairing and supercharge the interactive TUI with archive inspection.
+
+**Tasks:**
+- Implement `nova serve` (aliases: `server`, `httpd`):
+  - Zero-config static HTTP file server with auto-failover port binding (increments up to 100 ports).
+  - Single Page Application (SPA) fallback routing mode (`--spa`).
+  - Terminal QR code generation rendering half-block QR code for instant mobile device pairing.
+  - Real-time colorized HTTP request logging table with status codes, badges, and latency metrics.
+  - CORS header injection (`--cors`) and one-shot probe testing (`--once`).
+- Interactive TUI Supercharging:
+  - Archive (`.zip`, `.jar`) content preview with file listing and compression savings ratio.
+  - Inline command palette calculator (`:calc <expr>`) with multi-base results.
+  - Palette tips for `:history` and `:serve`.
+
+**Exit Gate:**
+- 100% test pass across all 46 packages and clean security audit.
+- Release version `1.8.0` verified and deployed.
+
+
 
 
 

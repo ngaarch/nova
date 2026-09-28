@@ -4,6 +4,35 @@ All notable changes to `nova` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-09-28
+
+### Added
+- **Scientific, Programmer & Byte-Unit Terminal Calculator (`nova calc` / `nova expr` / `nova math` / `nova eval`)**:
+  - Full algebraic, scientific, bitwise, and byte-unit expression evaluator with strict recursive descent precedence parser.
+  - Multi-base numeric conversions: Decimal, Hexadecimal (`0x...`), Binary (`0b...`), Octal (`0o...`), and human byte capacities (`B`, `KB`, `MB`, `GB`, `TB`, `PB`, `KiB`, `MiB`, `GiB`, `TiB`).
+  - Bitwise operations (`<<`, `>>`, `&`, `|`, `^`, `~`) and math functions (`sqrt`, `abs`, `round`, `floor`, `ceil`, `sin`, `cos`, `tan`, `log`, `log2`, `log10`, `pow`, `fact`) with mathematical constants (`pi`, `e`, `tau`, `phi`).
+  - Visual dashboard with structured cards, precision formatting (`-p` / `--precision`), and raw numeric pipeline `--plain` / structured `--json`.
+
+- **Shell History Intelligence & Command Analytics (`nova history` / `nova hist` / `nova analytics`)**:
+  - Multi-shell parser engine supporting Bash (`~/.bash_history`), Zsh extended history (`: <timestamp>:0;<cmd>` in `~/.zsh_history`), and Fish shell (`~/.local/share/fish/fish_history`).
+  - Intelligent command distribution analytics with horizontal ANSI bar charts, percentages, and execution counters.
+  - Productivity categorization engine (Git, Development, System, Containers, Network, Editors, Shell utilities).
+  - Search and filter queries (`-q` / `--query`), top command limits (`-n` / `--top`), custom history path (`-f` / `--file`), and pipeline `--plain` / structured `--json`.
+
+- **Zero-Config Static Web Server & Mobile QR Pairing (`nova serve` / `nova server` / `nova httpd`)**:
+  - Instant zero-configuration local HTTP static file server with automatic port conflict failover (`--port 8080`, auto-increments up to 100 ports if occupied).
+  - Single Page Application (SPA) fallback routing mode (`--spa`) forwarding unhandled requests to `index.html`.
+  - Terminal QR code generation rendering a high-contrast half-block QR code for instant mobile device camera pairing over local Wi-Fi / LAN.
+  - Real-time colorized HTTP request logging table with status codes (2xx, 3xx, 4xx, 5xx), method badges, latency timing, client IP, and transfer sizes.
+  - CORS header injection (`--cors`) and one-shot testing probe mode (`--once`).
+
+- **Interactive TUI Supercharging (TUI v1.8)**:
+  - **Archive Content Preview**: Automatic inspection of `.zip` and `.jar` archives in the file preview pane, showing file listings, compressed/uncompressed sizes, and compression savings ratio.
+  - **Inline Command Palette Calculator (`:calc <expr>`)**: Compute equations, hex, binary, and byte conversions directly within the TUI without exiting.
+  - **Command Palette Tips**: Added `:history` and `:serve` shortcut guidance in command palette.
+
+---
+
 ## [1.7.0] - 2026-09-28
 
 ### Added
