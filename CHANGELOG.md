@@ -4,6 +4,43 @@ All notable changes to `nova` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-09-28
+
+### Milestone 2.0 Generation Release
+
+### Added
+- **Developer Secret Scanner & Shannon Entropy Detector (`nova scan` / `nova audit` / `nova secret`) [Phase 30]**:
+  - High-performance security scanner and credential auditor detecting leaked secrets, private keys, API credentials, and high-entropy strings across codebases.
+  - Multi-pattern signature engine detecting AWS access keys, GitHub personal access tokens, OpenAI/Anthropic/HuggingFace API keys, Google Cloud & Slack tokens, Stripe keys, and RSA/OpenSSH/PGP private keys.
+  - Shannon Entropy calculator ($H = -\sum p_i \log_2 p_i$) identifying suspicious random password/token hashes with configurable entropy threshold (`-e` / `--entropy`, default 4.5 bits/byte).
+  - Automatic credential masking (`AKIA****************EXAMPLE`) ensuring raw credentials are never leaked in terminal logs or stdout.
+  - Rule filtering (`-p` / `--rule`), directory ignoring (`-i` / `--ignore` for `.git`, `node_modules`, `vendor`), deterministic tab-delimited `--plain`, and structured audit `--json`.
+
+- **Multi-Core Hardware Stress & Benchmark Suite (`nova stress` / `nova cpu` / `nova burn` / `nova benchmark`) [Phase 31]**:
+  - Multi-threaded CPU, memory, and hashing stress suite testing hardware stability, thread contention, and maximum throughput.
+  - Three specialized stress engines:
+    - **SHA-256**: High-throughput cryptographic hashing pipeline measuring hashes/sec and data processing speed (MB/s).
+    - **Floating Math**: Heavy algebraic and trigonometric floating-point operations benchmark measuring MFLOPS.
+    - **Memory Bandwidth**: Multi-threaded 64KB block allocation and memory transfer benchmark measuring RAM throughput (GB/s).
+  - Configurable execution duration (`-d` / `--duration`, default 3s) and thread concurrency (`-t` / `--threads`, default runtime.NumCPU()).
+  - Pipeline-friendly tab-separated `--plain` and structured `--json` metrics.
+
+- **Terminal Color Palette, Contrast Studio & WCAG Inspector (`nova color` / `nova palette` / `nova colors` / `nova contrast`) [Phase 32]**:
+  - Comprehensive terminal color visualization and accessibility suite.
+  - 16 ANSI Standard color palette with standard and high-intensity bright variant blocks.
+  - 256-color xterm grid rendering the 6x6x6 RGB color cube and 24-step grayscale ramp.
+  - 24-bit TrueColor spectrum generator producing smooth full-spectrum gradient bars.
+  - WCAG 2.1 Contrast Ratio Inspector computing relative luminance ($L$) and contrast ratios ($(L_1 + 0.05)/(L_2 + 0.05)$) with compliance levels (`AAA`, `AA`, `AA Large`, `Fail`) and live sample text previews.
+  - Custom foreground and background color testing (`--fg`, `--bg`) supporting 6-digit and 3-digit hex strings (`#RRGGBB`).
+  - Pipeline-friendly `--plain` and structured `--json` reports.
+
+- **UI/UX 2.0 Supercharging & Modernization**:
+  - **Categorized Help Catalog (`nova --help`)**: Grouped subcommands into clear, functional sections: *Files & Navigation*, *Network & Security*, *System & Diagnostics*, and *Developer & Utilities*, with visual icons and descriptions.
+  - **Fluorescent Neon Filter Highlighting**: Interactive TUI `/filter` search now highlights matched query characters in high-contrast fluorescent neon (cyan/magenta) against standard filenames.
+  - **Modernized Status Bar Pill Design**: Redesigned TUI bottom status bar with sleek status pills (`● READY`, `🔍 FILTER`), clean column dividers, and enhanced selection/bookmark badges.
+
+---
+
 ## [1.9.0] - 2026-09-28
 
 ### Added

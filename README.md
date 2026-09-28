@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.27+-00ADD8?logo=go)](go.mod)
-[![Status](https://img.shields.io/badge/Release-v1.9.0-success.svg)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/Release-v2.0.0-success.svg)](CHANGELOG.md)
 [![Dependencies](https://img.shields.io/badge/Dependencies-Zero-brightgreen.svg)](go.mod)
 [![Architecture](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](ROADMAP.md)
 
@@ -22,6 +22,9 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
   - **Human Mode**: Colored, responsive layouts with icons for interactive terminal sessions.
   - **Plain Mode (`--plain`)**: Unformatted, deterministic, tab/newline-separated text for pipelines.
   - **JSON Mode (`--json`)**: Structured, schema-valid JSON for machine processing.
+- 🛡️ **Secret & Entropy Scanner (`scan`)**: Developer credential auditor and Shannon entropy analyzer detecting leaked API keys, tokens, and private keys with automatic masking.
+- ⚡ **Hardware Stress Suite (`stress`)**: Multi-core CPU, memory bandwidth, and SHA-256 stress test measuring throughput, MFLOPS, and GB/s.
+- 🎨 **Color Studio & WCAG Inspector (`color`)**: 16 ANSI and 256-color palette grids, TrueColor gradients, and WCAG 2.1 contrast ratio calculations.
 - 🔍 **Concurrent Search (`grep`)**: Multi-threaded regex/literal search engine with binary detection and neon highlights.
 - 📖 **Markdown Reader (`md`)**: Rich terminal Markdown document reader with styled headings, syntax code blocks, and table auto-formatting.
 - 📝 **Developer Scratchpad (`note`)**: Local markdown notes manager and TODO task tracker with in-place task toggling and progress bars.
@@ -35,7 +38,7 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 - 📊 **Telemetry & Benchmarks**: Real-time system intelligence (`sysinfo`) and isolated disk I/O throughput tests (`bench`).
 - 🌿 **Lightweight Git Awareness**: Instant `.git/HEAD` branch inspection and non-blocking status badges (`M`, `A`, `?`, `D`, `R`, `!`) with a strict 50ms timeout guard.
 - 🛡️ **Safety by Default**: Destructive operations (`rm`, `mv`, `cp`) enforce root protection (`/`, volume roots), prevent self-descendant recursion, and support `-n` / `--dry-run`.
-- 🖥️ **Interactive TUI**: Dual-pane file navigator with syntax-highlighted previews, zip archive preview, inline `:calc` evaluator, command palette (`:`), directory bookmarks (`b`/`B`, `1-9`), real-time theme cycling (`t`), sorting modes (`s`), and hex dump inspector (`x`).
+- 🖥️ **Interactive TUI 2.0**: Dual-pane file navigator with fluorescent neon filter highlights, modernized status bar pills, syntax-highlighted previews, archive inspection, inline `:calc` evaluator, command palette (`:`), directory bookmarks (`b`/`B`, `1-9`), real-time theme cycling (`t`), sorting modes (`s`), and hex dump inspector (`x`).
 - 📦 **Zero External Runtime Dependencies**: Standard library only.
 
 ---
@@ -45,6 +48,9 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 | Command | Category | Description |
 |---|---|---|
 | `nova` / `nova interactive` | Explorer | Interactive dual-pane terminal file browser with live syntax previews, archive inspection, git diffs (`D`), fuzzy finder (`Ctrl+P`), bookmarks (`1-9`), and palette |
+| `nova scan` | Security | Developer secret scanner & Shannon entropy detector for leaked API keys, tokens, and credentials |
+| `nova stress` | Benchmark | Multi-core hardware stress suite measuring SHA-256, floating math MFLOPS, and memory bandwidth (GB/s) |
+| `nova color` | Accessibility | Terminal color palette, 24-bit TrueColor spectrum, and WCAG 2.1 contrast ratio inspector |
 | `nova ls` | Inspection | Modern directory listing with compact responsive grid, table (`-l`), sorting, and git badges |
 | `nova cat` | Viewer | Streaming file viewer with syntax highlighting, line numbers, pagination, and hex dumps (`--hex`) |
 | `nova grep` | Search | Concurrent multi-threaded regex/text content search with binary skipping and neon match highlights |
@@ -88,9 +94,9 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 ### Pre-Compiled Binaries
 Download the latest release tarball or zip for your operating system and architecture from the [Releases](https://github.com/ngaarch/nova/releases) page:
 
-- **Linux**: `nova_1.9.0_linux_amd64.tar.gz` | `nova_1.9.0_linux_arm64.tar.gz`
-- **macOS**: `nova_1.9.0_darwin_amd64.tar.gz` | `nova_1.9.0_darwin_arm64.tar.gz`
-- **Windows**: `nova_1.9.0_windows_amd64.zip` | `nova_1.9.0_windows_arm64.zip`
+- **Linux**: `nova_2.0.0_linux_amd64.tar.gz` | `nova_2.0.0_linux_arm64.tar.gz`
+- **macOS**: `nova_2.0.0_darwin_amd64.tar.gz` | `nova_2.0.0_darwin_arm64.tar.gz`
+- **Windows**: `nova_2.0.0_windows_amd64.zip` | `nova_2.0.0_windows_arm64.zip`
 
 Extract and place the `nova` binary into your system `PATH` (e.g., `/usr/local/bin`).
 
