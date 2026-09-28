@@ -544,4 +544,21 @@ func TestInteractiveInspectorAndQuickHash(t *testing.T) {
 	}
 }
 
+func TestInteractiveDiffMode(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	th := theme.Get("default")
+	m, err := NewModel(tmpDir, 80, 24, false, th, terminal.ColorTrueColor, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Test 'D' toggles DiffMode
+	in := bytes.NewReader([]byte{'D', 'q'})
+	var out bytes.Buffer
+	_ = RunLoop(m, in, &out)
+	if !m.DiffMode {
+		t.Errorf("expected DiffMode to be true after pressing 'D'")
+	}
+}
+
 

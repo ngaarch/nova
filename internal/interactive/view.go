@@ -295,7 +295,7 @@ func renderStatusBar(m *Model, width int) string {
 }
 
 func renderFooter(m *Model, width int) string {
-	hints := " [j/k] Move  [:] Cmd  [s] Sort  [t] Theme  [x] Hex  [i] Inspect  [#] Hash  [b/B] Bm  [?] Help  [q] Quit"
+	hints := " [j/k] Move  [:] Cmd  [s] Sort  [t] Theme  [x] Hex  [D] Diff  [i] Inspect  [#] Hash  [b/B] Bm  [?] Help  [q] Quit"
 	return padOrTruncate(m.Theme.Format(theme.RoleMuted, hints, m.Profile), width)
 }
 
@@ -333,6 +333,7 @@ func overlayHelpModal(m *Model, screen []string, width, height int) []string {
 		"│  s            Cycle sorting (name/size/time) │",
 		"│  t            Cycle theme in real-time       │",
 		"│  x, H         Toggle hex dump inspection     │",
+		"│  D            Toggle git diff preview        │",
 		"│  i            Inspect file metadata          │",
 		"│  #            Compute quick SHA-256 hash     │",
 		"│  n            Create new file                │",

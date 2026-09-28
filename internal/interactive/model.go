@@ -36,6 +36,7 @@ type Model struct {
 	ThemeIndex       int
 	SortMode         string // "name", "size", "time", "ext"
 	HexMode          bool
+	DiffMode         bool
 	Profile          terminal.ColorProfile
 	UnicodeSupported bool
 	PreviewLines     []string
@@ -288,6 +289,8 @@ func (m *Model) ExecuteCommand(rawCmd string) error {
 		m.QuickHash()
 	case "hex", "dump":
 		m.ToggleHex()
+	case "diff":
+		m.ToggleDiff()
 	default:
 		m.SetActionMessage("Unknown command: " + parts[0])
 	}
@@ -494,7 +497,22 @@ func (m *Model) UpdatePreview() {
 	paneWidth := m.Width/2 - 2
 	paneHeight := m.ListHeight() + 2
 
-	m.PreviewLines = LoadPreview(entry, paneWidth, paneHeight, m.Theme, m.Profile, m.HexMode)
+	if m.DiffMode {
+		m.PreviewLines = LoadDiffPreview(entry, paneWidth, paneHeight, m.Theme, m.Profile)
+	} else {
+		m.PreviewLines = LoadPreview(entry, paneWidth, paneHeight, m.Theme, m.Profile, m.HexMode)
+	}
+}
+
+// ToggleDiff toggles git diff preview mode.
+func (m *Model) ToggleDiff() {
+	m.DiffMode = !m.DiffMode
+	if m.DiffMode {
+		m.SetActionMessage("Git diff preview enabled (press D to toggle back)")
+	} else {
+		m.SetActionMessage("Standard preview enabled")
+	}
+	m.UpdatePreview()
 }
 
 // ToggleInspector toggles the metadata inspector modal.

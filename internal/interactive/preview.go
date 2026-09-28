@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 
 	"nova/internal/commands/cat"
@@ -173,5 +174,41 @@ func loadFilePreview(entry *Entry, width, height int, th *theme.Theme, profile t
 		lineNum++
 	}
 
+	return lines
+}
+
+// LoadDiffPreview loads a git diff preview for the entry against HEAD.
+func LoadDiffPreview(entry *Entry, width, height int, th *theme.Theme, profile terminal.ColorProfile) []string {
+	if entry == nil {
+		return []string{th.Format(theme.RoleMuted, "  (No selection)", profile)}
+	}
+
+	var lines []string
+	header := fmt.Sprintf("🌿 Git Diff: %s", entry.Name)
+	lines = append(lines, th.Format(theme.RoleAccent, renderer.Truncate(header, width, "…"), profile))
+	lines = append(lines, "")
+
+	cmd := exec.Command("git", "diff", "HEAD", "--", entry.Path)
+	out, err := cmd.Output()
+	if err != nil || len(out) == 0 {
+		lines = append(lines, th.Format(theme.RoleMuted, "  (No uncommitted changes against HEAD)", profile))
+		return lines
+	}
+
+	scanner := bufio.NewScanner(bytes.NewReader(out))
+	for scanner.Scan() && len(lines) < height {
+		line := scanner.Text()
+		var styledLine string
+		if strings.HasPrefix(line, "+") && !strings.HasPrefix(line, "+++") {
+			styledLine = th.Format(theme.RoleSuccess, line, profile)
+		} else if strings.HasPrefix(line, "-") && !strings.HasPrefix(line, "---") {
+			styledLine = th.Format(theme.RoleError, line, profile)
+		} else if strings.HasPrefix(line, "@@") {
+			styledLine = th.Format(theme.RoleAccent, line, profile)
+		} else {
+			styledLine = th.Format(theme.RoleMuted, line, profile)
+		}
+		lines = append(lines, renderer.Truncate(styledLine, width, "…"))
+	}
 	return lines
 }

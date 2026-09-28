@@ -462,6 +462,8 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 			m.CycleSort()
 		case 'x', 'H':
 			m.ToggleHex()
+		case 'D':
+			m.ToggleDiff()
 		case 'i':
 			m.ToggleInspector()
 		case '#':
