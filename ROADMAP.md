@@ -21,6 +21,8 @@ PHASE 13 Content Intelligence & Search (`grep`)             [COMPLETED]
 PHASE 14 System Intelligence & Benchmarking (`sysinfo`)     [COMPLETED]
 PHASE 15 Workspace Hygiene & Archive Packaging (`clean`)    [COMPLETED]
 PHASE 16 Live Monitoring & Task Automation (`watch`)        [COMPLETED]
+PHASE 17 Integrity & Binary Inspection (`hash`, `hex`)          [COMPLETED]
+PHASE 18 Environment Telemetry & Next-Gen TUI (`env`, TUI v1.5) [COMPLETED]
 ```
 
 ---
@@ -348,6 +350,50 @@ PHASE 16 Live Monitoring & Task Automation (`watch`)        [COMPLETED]
 **Exit Gate:**
 - Live watch loops terminate cleanly on SIGINT / SIGTERM with zero goroutine leaks.
 - 100% test pass across all 34 packages.
+
+---
+
+## Phase 17 — Integrity, Cryptography & Binary Inspection (`hash`, `hex`)
+
+**Goal:** Provide native, pure Go cryptographic hashing and colorized hex dump inspection.
+
+**Tasks:**
+- Implement `nova hash` (aliases: `checksum`, `digest`, `sha256`):
+  - Support algorithms: `sha256`, `sha512`, `sha1`, `md5`, `crc32`.
+  - Verification mode (`-c` / `--check <file>`): validates standard checksum files with PASS/FAILED/MISSING status badges.
+  - Recursive directory tree hashing (`-r` / `--recursive`).
+  - Streaming constant-memory pipeline for gigabyte-sized files.
+- Implement `nova hex` (aliases: `hexdump`, `dump`, `xxd`):
+  - Modern canonical hex dump layout with colorized byte categorizations (null, printable ASCII, control bytes, high bytes).
+  - Configurable byte grouping (`-g`), columns (`-c`), byte offset skip (`-s`), and length limits (`-n`).
+  - Integrated ASCII preview panel with dot fallback.
+  - Pipe & stdin friendly: works seamlessly in command pipelines.
+
+**Exit Gate:**
+- 100% test pass across checksum verification, recursive hashing, and hex formats.
+- Safe execution with deterministic `--plain` and structured `--json` outputs.
+
+---
+
+## Phase 18 — Environment Telemetry & Advanced TUI Navigation (`env`, TUI v1.5)
+
+**Goal:** Provide environment variable auditing, secret protection, and rich modal TUI dialogs.
+
+**Tasks:**
+- Implement `nova env` (aliases: `environ`, `envinfo`):
+  - Detects and masks sensitive credentials (`*KEY*`, `*TOKEN*`, `*PASSWORD*`, `*SECRET*`, `*AUTH*`, `*PRIVATE*`).
+  - Pattern search and filtering (`-f` / `--filter`).
+  - Categorization grouping: Runtimes, System & Shell, Cloud & DevOps, General.
+  - Shell export generators: `--export=sh` and `--export=fish`.
+- Interactive TUI Supercharging:
+  - File Metadata Inspector modal (`i` key): floating modal card detailing full path, exact & human size, octal mode & permissions, timestamps, and symlink targets.
+  - Quick SHA-256 Checksum (`#` key): instant hash calculation of focused file in interactive view.
+  - Palette integration: `:inspect`, `:hash`, `:hex` commands.
+
+**Exit Gate:**
+- Environment variable secrets verified masked by default.
+- 100% unit test coverage across all new packages.
+- Zero race conditions or vet warnings.
 
 
 

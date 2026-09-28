@@ -4,6 +4,38 @@ All notable changes to `nova` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-09-28
+
+### Added
+- **Cryptographic & Integrity Checksum Suite (`nova hash` / `nova checksum` / `nova digest`)**:
+  - Multi-algorithm support: SHA-256 (default), SHA-512, SHA-1, MD5, CRC32.
+  - Streaming I/O with constant memory footprint for gigabyte-scale files.
+  - Verification mode (`-c` / `--check <file>`): validates standard checksum files (compatible with `sha256sum -c`), reporting status badges (`[PASS]`, `[FAILED]`, `[MISSING]`).
+  - Recursive directory tree hashing (`-r` / `--recursive`).
+  - Formats: Card table with algorithm pill, standard UNIX shasum `--plain`, and structured `--json`.
+
+- **Modern Colorized Hex Dump Inspector (`nova hex` / `nova hexdump` / `nova dump`)**:
+  - Byte categorization in terminal: null bytes (dim gray), printable ASCII (bright green/cyan), control characters (magenta), high bytes (amber).
+  - Offset column in hex, configurable byte grouping (`-g`), columns per row (`-c`), byte offsets (`-s` / `--skip`), length limit (`-n` / `--length`).
+  - Integrated ASCII preview panel with dot fallback for unprintable characters.
+  - Stream-friendly: reads seamlessly from stdin or files.
+  - Formats: canonical plain hex dump and structured `--json`.
+
+- **Developer Environment & Secret Auditor (`nova env` / `nova environ`)**:
+  - Audits environment variables with intelligent secret detection & masking (`API_KEY`, `TOKEN`, `PASSWORD`, `SECRET`, `AUTH`, `PRIVATE`, `CREDENTIAL`).
+  - Filter & search by pattern (`-f` / `--filter`).
+  - Categorization grouping: Development Runtimes, System & Shell, Cloud & DevOps, General.
+  - Reveal mode (`-s` / `--show-secrets`).
+  - Shell export generator: `--export=sh` and `--export=fish`.
+  - Formats: Human dashboard, `KEY=VAL` `--plain`, and structured `--json`.
+
+- **Interactive TUI Supercharging (`nova interactive`)**:
+  - **File Metadata Inspector (`i` key)**: Floating modal window displaying deep file metadata (full path, size in bytes & human units, octal permissions, mode string, timestamps, symlink target).
+  - **Quick SHA-256 Checksum (`#` key)**: Instantly computes the cryptographic hash of the selected file directly in the interactive navigator.
+  - **Command Palette Expansion**: `:inspect`, `:hash`, `:hex` commands now accessible via the palette.
+
+---
+
 ## [1.4.0] - 2026-09-27
 
 ### Added
