@@ -504,4 +504,44 @@ func TestInteractivePaletteAndBookmarks(t *testing.T) {
 	}
 }
 
+func TestInteractiveInspectorAndQuickHash(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	th := theme.Get("default")
+	m, err := NewModel(tmpDir, 80, 24, false, th, terminal.ColorTrueColor, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 1. Test Inspector toggle: 'i'
+	in1 := bytes.NewReader([]byte{'i', 'q'})
+	var out1 bytes.Buffer
+	_ = RunLoop(m, in1, &out1)
+	if !m.InspectorActive {
+		t.Errorf("expected InspectorActive to be true after pressing 'i'")
+	}
+
+	// 2. Test Inspector close: 'i' again
+	in2 := bytes.NewReader([]byte{'i', 'q'})
+	var out2 bytes.Buffer
+	_ = RunLoop(m, in2, &out2)
+	if m.InspectorActive {
+		t.Errorf("expected InspectorActive to be false after toggling 'i' again")
+	}
+
+	// 3. Test QuickHash: '#'
+	// Select a file first
+	for i, e := range m.Entries {
+		if !e.IsDir {
+			m.Cursor = i
+			break
+		}
+	}
+	in3 := bytes.NewReader([]byte{'#', 'q'})
+	var out3 bytes.Buffer
+	_ = RunLoop(m, in3, &out3)
+	if !strings.Contains(m.ActionMessage, "SHA256:") {
+		t.Errorf("expected ActionMessage to contain SHA256:, got: %s", m.ActionMessage)
+	}
+}
+
 

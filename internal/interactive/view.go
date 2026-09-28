@@ -86,6 +86,8 @@ func Render(m *Model) string {
 	// If Help modal is active, overlay it on top of the rendered screen
 	if m.HelpActive {
 		screen = overlayHelpModal(m, screen, width, height)
+	} else if m.InspectorActive {
+		screen = overlayInspectorModal(m, screen, width, height)
 	}
 
 	// Return full frame with ANSI home cursor
@@ -293,7 +295,7 @@ func renderStatusBar(m *Model, width int) string {
 }
 
 func renderFooter(m *Model, width int) string {
-	hints := " [j/k] Move  [:] Command  [s] Sort  [t] Theme  [x] Hex  [b/B] Bookmark  [n] New  [?] Help  [q] Quit"
+	hints := " [j/k] Move  [:] Cmd  [s] Sort  [t] Theme  [x] Hex  [i] Inspect  [#] Hash  [b/B] Bm  [?] Help  [q] Quit"
 	return padOrTruncate(m.Theme.Format(theme.RoleMuted, hints, m.Profile), width)
 }
 
@@ -330,7 +332,9 @@ func overlayHelpModal(m *Model, screen []string, width, height int) []string {
 		"│  Space        Toggle item selection (multi)  │",
 		"│  s            Cycle sorting (name/size/time) │",
 		"│  t            Cycle theme in real-time       │",
-		"│  x            Toggle hex dump inspection     │",
+		"│  x, H         Toggle hex dump inspection     │",
+		"│  i            Inspect file metadata          │",
+		"│  #            Compute quick SHA-256 hash     │",
 		"│  n            Create new file                │",
 		"│  N            Create new folder              │",
 		"│  p            Toggle preview pane collapse   │",
@@ -386,6 +390,112 @@ func overlayHelpModal(m *Model, screen []string, width, height int) []string {
 		}
 
 		// Stamp box line at startX
+		leftPad := strings.Repeat(" ", startX)
+		styledBox := m.Theme.Format(theme.RoleAccent, bLine, m.Profile)
+		remainder := width - startX - boxWidth
+		if remainder < 0 {
+			remainder = 0
+		}
+		rightPad := strings.Repeat(" ", remainder)
+
+		result[y] = leftPad + styledBox + rightPad
+	}
+
+	return result
+}
+
+func overlayInspectorModal(m *Model, screen []string, width, height int) []string {
+	entry := m.CurrentEntry()
+	if entry == nil {
+		return screen
+	}
+
+	boxWidth := 56
+	if boxWidth > width-4 {
+		boxWidth = width - 4
+	}
+	if boxWidth < 20 {
+		return screen
+	}
+
+	fileType := "Regular File"
+	if entry.IsDir {
+		fileType = "Directory"
+	} else if entry.IsSymlink {
+		fileType = "Symbolic Link"
+	}
+
+	sizeStr := fmt.Sprintf("%d bytes (%s)", entry.Size, renderer.FormatSize(entry.Size, true))
+	modeStr := fmt.Sprintf("%s (%04o)", entry.Mode.String(), entry.Mode.Perm())
+	modStr := fmt.Sprintf("%s (%s)", entry.ModTime.Format("2006-01-02 15:04:05"), renderer.FormatRelativeTime(entry.ModTime))
+
+	innerW := boxWidth - 4
+	valW := innerW - 10
+	if valW < 10 {
+		valW = 10
+	}
+
+	nameLine := renderer.Truncate(entry.Name, valW, "...")
+	pathLine := renderer.Truncate(entry.Path, valW, "...")
+
+	boxLines := []string{
+		"╭──────────────────────────────────────────────────────╮",
+		"│               FILE METADATA INSPECTOR                │",
+		"├──────────────────────────────────────────────────────┤",
+		fmt.Sprintf("│  Name:     %-42s│", nameLine),
+		fmt.Sprintf("│  Path:     %-42s│", pathLine),
+		fmt.Sprintf("│  Type:     %-42s│", fileType),
+		fmt.Sprintf("│  Size:     %-42s│", sizeStr),
+		fmt.Sprintf("│  Mode:     %-42s│", modeStr),
+		fmt.Sprintf("│  Modified: %-42s│", modStr),
+	}
+	if entry.IsSymlink && entry.Target != "" {
+		targetLine := renderer.Truncate(entry.Target, valW, "...")
+		boxLines = append(boxLines, fmt.Sprintf("│  Target:   %-42s│", targetLine))
+	}
+	boxLines = append(boxLines,
+		"├──────────────────────────────────────────────────────┤",
+		"│  Press [i], [Esc], or [q] to close inspector         │",
+		"╰──────────────────────────────────────────────────────╯",
+	)
+
+	if !m.UnicodeSupported {
+		for i, bl := range boxLines {
+			boxLines[i] = strings.ReplaceAll(bl, "╭", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "╮", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "╰", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "╯", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "┌", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "┐", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "└", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "┘", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "├", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "┤", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "─", "-")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "│", "|")
+		}
+	}
+
+	boxHeight := len(boxLines)
+	startY := (height - boxHeight) / 2
+	startX := (width - boxWidth) / 2
+
+	if startY < 0 {
+		startY = 0
+	}
+	if startX < 0 {
+		startX = 0
+	}
+
+	result := make([]string, len(screen))
+	copy(result, screen)
+
+	for i, bLine := range boxLines {
+		y := startY + i
+		if y >= len(result) {
+			break
+		}
+
 		leftPad := strings.Repeat(" ", startX)
 		styledBox := m.Theme.Format(theme.RoleAccent, bLine, m.Profile)
 		remainder := width - startX - boxWidth

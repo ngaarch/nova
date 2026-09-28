@@ -140,6 +140,9 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 				// Standalone Esc
 				if m.HelpActive {
 					m.HelpActive = false
+				} else if m.InspectorActive {
+					m.InspectorActive = false
+					m.SetActionMessage("")
 				} else if m.FilterActive {
 					m.FilterActive = false
 					m.FilterQuery = ""
@@ -457,8 +460,12 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 			m.CycleTheme()
 		case 's':
 			m.CycleSort()
-		case 'x':
+		case 'x', 'H':
 			m.ToggleHex()
+		case 'i':
+			m.ToggleInspector()
+		case '#':
+			m.QuickHash()
 		case ':':
 			m.CommandPaletteActive = true
 			m.CommandInput = ":"

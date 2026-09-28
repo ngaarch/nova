@@ -1,7 +1,10 @@
 package interactive
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,6 +27,7 @@ type Model struct {
 	FilterActive     bool
 	FilterQuery      string
 	HelpActive       bool
+	InspectorActive  bool
 	ShowHidden       bool
 	Width            int
 	Height           int
@@ -278,6 +282,12 @@ func (m *Model) ExecuteCommand(rawCmd string) error {
 				_ = m.LoadCurrentDir()
 			}
 		}
+	case "inspect", "info", "i":
+		m.ToggleInspector()
+	case "hash", "sha256":
+		m.QuickHash()
+	case "hex", "dump":
+		m.ToggleHex()
 	default:
 		m.SetActionMessage("Unknown command: " + parts[0])
 	}
@@ -485,4 +495,38 @@ func (m *Model) UpdatePreview() {
 	paneHeight := m.ListHeight() + 2
 
 	m.PreviewLines = LoadPreview(entry, paneWidth, paneHeight, m.Theme, m.Profile, m.HexMode)
+}
+
+// ToggleInspector toggles the metadata inspector modal.
+func (m *Model) ToggleInspector() {
+	m.InspectorActive = !m.InspectorActive
+	if m.InspectorActive {
+		m.HelpActive = false
+		m.SetActionMessage("Inspector opened (press i or Esc to close)")
+	} else {
+		m.SetActionMessage("")
+	}
+}
+
+// QuickHash calculates SHA-256 checksum for the currently focused file and shows it in status.
+func (m *Model) QuickHash() {
+	entry := m.CurrentEntry()
+	if entry == nil || entry.IsDir {
+		m.SetActionMessage("Cannot hash directory")
+		return
+	}
+	f, err := os.Open(entry.Path)
+	if err != nil {
+		m.SetActionMessage("Hash error: " + err.Error())
+		return
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		m.SetActionMessage("Hash error: " + err.Error())
+		return
+	}
+	digest := hex.EncodeToString(h.Sum(nil))
+	m.SetActionMessage(fmt.Sprintf("SHA256: %.16s... (%s)", digest, entry.Name))
 }
