@@ -414,7 +414,6 @@ func TestAppExecuteV15Commands(t *testing.T) {
 
 func TestAppExecuteV16Commands(t *testing.T) {
 	app := NewApp()
-	tmpDir := t.TempDir()
 
 	// 1. Test QR
 	var stdout, stderr bytes.Buffer
