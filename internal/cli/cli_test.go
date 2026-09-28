@@ -522,5 +522,48 @@ func TestAppExecuteV18Commands(t *testing.T) {
 	}
 }
 
+func TestAppExecuteV19Commands(t *testing.T) {
+	app := NewApp()
+
+	// 1. Test md
+	tmpDir := t.TempDir()
+	mdPath := filepath.Join(tmpDir, "readme.md")
+	_ = os.WriteFile(mdPath, []byte("# Guidelines\n\nContent here.\n"), 0644)
+
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"md", mdPath, "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for md, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "GUIDELINES") {
+		t.Errorf("expected GUIDELINES in md output, got: %s", stdout.String())
+	}
+
+	// 2. Test note
+	notesDir := filepath.Join(tmpDir, "notes")
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"note", "add", "Test Task", "-c", "- [ ] Item 1", "--dir=" + notesDir, "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for note add, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "Test Task") {
+		t.Errorf("expected Test Task in note output, got: %s", stdout.String())
+	}
+
+	// 3. Test cert (JWT decode)
+	stdout.Reset()
+	stderr.Reset()
+	jwtToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+	code = app.Run([]string{"cert", "jwt", jwtToken, "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for cert jwt, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "ALGORITHM") || !strings.Contains(stdout.String(), "HS256") {
+		t.Errorf("expected ALGORITHM and HS256 in cert jwt output, got: %s", stdout.String())
+	}
+}
+
+
 
 

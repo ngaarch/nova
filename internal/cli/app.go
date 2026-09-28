@@ -11,6 +11,7 @@ import (
 	"nova/internal/commands/bench"
 	calccmd "nova/internal/commands/calc"
 	"nova/internal/commands/cat"
+	certcmd "nova/internal/commands/cert"
 	"nova/internal/commands/clean"
 	"nova/internal/commands/completion"
 	"nova/internal/commands/cp"
@@ -26,9 +27,11 @@ import (
 	httpcmd "nova/internal/commands/http"
 	"nova/internal/commands/interactive"
 	"nova/internal/commands/ls"
+	mdcmd "nova/internal/commands/md"
 	"nova/internal/commands/mkdir"
 	"nova/internal/commands/mv"
 	netcmd "nova/internal/commands/net"
+	notecmd "nova/internal/commands/note"
 	qrcmd "nova/internal/commands/qr"
 	"nova/internal/commands/rm"
 	runcmd "nova/internal/commands/run"
@@ -95,6 +98,9 @@ func (a *App) registerRoadmapCommands() {
 		calccmd.Command(),
 		historycmd.Command(),
 		servecmd.Command(),
+		mdcmd.Command(),
+		notecmd.Command(),
+		certcmd.Command(),
 	}
 }
 
