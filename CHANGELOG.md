@@ -4,6 +4,36 @@ All notable changes to `nova` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-09-28
+
+### Added
+- **Terminal Markdown Document Renderer & Reader (`nova md` / `nova doc` / `nova view`)**:
+  - Full terminal Markdown rendering engine supporting styled headings (`# H1` banner, `## H2` accent, `### H3`), blockquotes (`│ `), bulleted/numbered lists, and interactive todo checkboxes (`[ ]` / `[✓]`).
+  - Table formatter with clean Unicode box borders (`┌─┬─┐`) and column width auto-calculation.
+  - Code blocks with syntax highlighting via `cat/syntax` and framed border boxes.
+  - Table of Contents generator (`-t` / `--toc`) extracting document headings and hierarchy tree.
+  - Text reflow line-wrapping (`-w` / `--width`), interactive terminal pager (`-p` / `--pager`), raw unstyled `--plain`, and structured AST `--json`.
+
+- **Developer Notes, Scratchpad & TODO Checklist Tracker (`nova note` / `nova notes` / `nova todo`)**:
+  - Fast developer scratchpad and markdown notes manager storing notes locally (`~/.config/nova/notes/` or `.nova/notes/`).
+  - Automatic task extraction from `- [ ]` and `- [x]` markdown checklists with overall progress calculation and progress bars (`[██████░░░░] 60%`).
+  - Interactive task toggler (`nova note toggle <id> <task#>`) allowing check/uncheck directly from terminal without opening an editor.
+  - Note search (`nova note search <query>`), tags filtering, full note viewer, and pipeline `--plain` / structured `--json`.
+
+- **SSL/TLS Certificate Validator & JWT Token Decoder (`nova cert` / `nova ssl` / `nova tls` / `nova jwt`)**:
+  - Remote TLS host inspector connecting and extracting peer certificate chains, SNI, negotiated TLS version (TLS 1.2, TLS 1.3), cipher suites, Subject Alternative Names (SANs), serial numbers, and key algorithms (RSA, ECDSA).
+  - Expiration countdown with status badges (`Valid`, `Expiring Soon < 30d`, `Expired`).
+  - Local certificate inspector decoding `.crt`, `.pem`, `.cer` files with PEM block unwrapping and DER fallback.
+  - High-performance JSON Web Token (JWT) decoder (`nova cert jwt <token>`) splitting header, payload claims, and signature, with human-readable timestamps for `exp`, `iat`, `nbf`.
+  - Machine-friendly `--plain` tab-delimited streams and schema-valid `--json`.
+
+- **Interactive TUI Supercharging (TUI v1.9)**:
+  - **Formatted Markdown Previews**: Inspecting `.md` and `.markdown` files now renders rich typography, styled headings, list markers, and status checkboxes directly in the dual-pane preview.
+  - **Quick Bookmark Navigation (`1-9`)**: Pressing numeric keys `1` through `9` in normal navigation mode instantly jumps to corresponding bookmarked directories.
+  - **Command Palette Expansion**: Added palette tips for `:md`, `:note`, `:todo`, `:cert`.
+
+---
+
 ## [1.8.0] - 2026-09-28
 
 ### Added

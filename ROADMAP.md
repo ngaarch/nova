@@ -555,6 +555,62 @@ PHASE 20 Git Productivity Dashboard & Terminal QR (`git`, `qr`) [COMPLETED]
 - 100% test pass across all 46 packages and clean security audit.
 - Release version `1.8.0` verified and deployed.
 
+---
+
+## Phase 27 — Terminal Markdown Document Reader (`md`, `doc`, `view`)
+
+**Goal:** Provide an ergonomic, beautiful terminal Markdown reader with styled headings, syntax code blocks, and table auto-formatting.
+
+**Tasks:**
+- Implement `nova md` (aliases: `doc`, `view`, `markdown`):
+  - Pure Go Markdown parser for headings, bulleted/numbered lists, task checkboxes (`[ ]` / `[✓]`), blockquotes (`│ `), and horizontal rules.
+  - Table auto-formatting with Unicode box borders and column width calculations.
+  - Code block rendering with syntax highlighting via `cat/syntax`.
+  - Table of Contents generator (`-t` / `--toc`).
+  - Text line-wrapping (`-w`), interactive pager (`-p`), pipeline `--plain`, and structured `--json`.
+
+**Exit Gate:**
+- 100% test pass across parser, tables, code blocks, and TOC generators.
+
+---
+
+## Phase 28 — Developer Notes & TODO Checklist Tracker (`note`, `notes`, `todo`)
+
+**Goal:** Build a lightweight terminal scratchpad and markdown task checklist tracker.
+
+**Tasks:**
+- Implement `nova note` (aliases: `notes`, `todo`, `memo`):
+  - Local storage in `~/.config/nova/notes/` or workspace `.nova/notes/`.
+  - Automatic task checklist extraction from `- [ ]` and `- [x]` markdown items with progress bars.
+  - In-place task toggling (`nova note toggle <id> <task#>`) without external editor.
+  - Fast search, tags filtering, and pipeline `--plain` / structured `--json`.
+
+**Exit Gate:**
+- 100% test pass across lifecycle (add, show, todo, toggle, search, rm).
+
+---
+
+## Phase 29 — SSL/TLS Certificate Validator & JWT Decoder (`cert`, `ssl`, `jwt`)
+
+**Goal:** Deliver low-latency SSL/TLS certificate inspection and JSON Web Token decoding with zero dependencies.
+
+**Tasks:**
+- Implement `nova cert` (aliases: `ssl`, `tls`, `jwt`):
+  - Remote TLS host connection, SNI, TLS version, cipher suite, certificate chain extraction.
+  - Expiration countdowns, SANs, serial numbers, RSA/ECDSA key algorithms.
+  - Local certificate file (`.crt`, `.pem`, `.cer`) parsing.
+  - Pure Go JWT token decoder splitting header, payload, and signature with claim evaluation (`exp`, `iat`, `nbf`, `sub`).
+  - Pipeline `--plain` and structured `--json`.
+- Interactive TUI Supercharging:
+  - Formatted Markdown previews in preview pane.
+  - Numeric bookmark jump shortcuts (`1-9`).
+  - Command palette tips for `:md`, `:note`, `:cert`.
+
+**Exit Gate:**
+- 100% test pass across all 49 packages.
+- Release version `1.9.0` verified and deployed.
+
+
 
 
 

@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.27+-00ADD8?logo=go)](go.mod)
-[![Status](https://img.shields.io/badge/Release-v1.8.0-success.svg)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/Release-v1.9.0-success.svg)](CHANGELOG.md)
 [![Dependencies](https://img.shields.io/badge/Dependencies-Zero-brightgreen.svg)](go.mod)
 [![Architecture](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](ROADMAP.md)
 
@@ -23,6 +23,9 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
   - **Plain Mode (`--plain`)**: Unformatted, deterministic, tab/newline-separated text for pipelines.
   - **JSON Mode (`--json`)**: Structured, schema-valid JSON for machine processing.
 - 🔍 **Concurrent Search (`grep`)**: Multi-threaded regex/literal search engine with binary detection and neon highlights.
+- 📖 **Markdown Reader (`md`)**: Rich terminal Markdown document reader with styled headings, syntax code blocks, and table auto-formatting.
+- 📝 **Developer Scratchpad (`note`)**: Local markdown notes manager and TODO task tracker with in-place task toggling and progress bars.
+- 🔒 **Certificate & JWT Auditor (`cert`)**: SSL/TLS certificate validator and JSON Web Token claim decoder with expiration countdowns.
 - 🧮 **Terminal Calculator (`calc`)**: Scientific, programmer, bitwise, and human byte-unit arithmetic with multi-base breakdown.
 - 📜 **Shell Intelligence (`history`)**: Multi-shell history analytics, horizontal distribution bar charts, and category breakdowns.
 - 🌐 **Web Server (`serve`)**: Zero-config static HTTP file server with SPA fallback routing, mobile QR pairing, and live request logging.
@@ -32,7 +35,7 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 - 📊 **Telemetry & Benchmarks**: Real-time system intelligence (`sysinfo`) and isolated disk I/O throughput tests (`bench`).
 - 🌿 **Lightweight Git Awareness**: Instant `.git/HEAD` branch inspection and non-blocking status badges (`M`, `A`, `?`, `D`, `R`, `!`) with a strict 50ms timeout guard.
 - 🛡️ **Safety by Default**: Destructive operations (`rm`, `mv`, `cp`) enforce root protection (`/`, volume roots), prevent self-descendant recursion, and support `-n` / `--dry-run`.
-- 🖥️ **Interactive TUI**: Dual-pane file navigator with syntax-highlighted previews, zip archive preview, inline `:calc` evaluator, command palette (`:`), directory bookmarks (`b`/`B`), real-time theme cycling (`t`), sorting modes (`s`), and hex dump inspector (`x`).
+- 🖥️ **Interactive TUI**: Dual-pane file navigator with syntax-highlighted previews, zip archive preview, inline `:calc` evaluator, command palette (`:`), directory bookmarks (`b`/`B`, `1-9`), real-time theme cycling (`t`), sorting modes (`s`), and hex dump inspector (`x`).
 - 📦 **Zero External Runtime Dependencies**: Standard library only.
 
 ---
@@ -41,10 +44,13 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 
 | Command | Category | Description |
 |---|---|---|
-| `nova` / `nova interactive` | Explorer | Interactive dual-pane terminal file browser with live syntax previews, archive inspection, git diffs (`D`), fuzzy finder (`Ctrl+P`), bookmarks, and palette |
+| `nova` / `nova interactive` | Explorer | Interactive dual-pane terminal file browser with live syntax previews, archive inspection, git diffs (`D`), fuzzy finder (`Ctrl+P`), bookmarks (`1-9`), and palette |
 | `nova ls` | Inspection | Modern directory listing with compact responsive grid, table (`-l`), sorting, and git badges |
 | `nova cat` | Viewer | Streaming file viewer with syntax highlighting, line numbers, pagination, and hex dumps (`--hex`) |
 | `nova grep` | Search | Concurrent multi-threaded regex/text content search with binary skipping and neon match highlights |
+| `nova md` | Viewer | Terminal Markdown document reader with styled headings, syntax code blocks, tables, and TOC |
+| `nova note` | Productivity | Developer notes scratchpad and TODO checklist tracker with interactive task toggling and progress bars |
+| `nova cert` | Security | SSL/TLS certificate validator and JSON Web Token (JWT) claim decoder with expiration countdowns |
 | `nova calc` | Utility | Scientific, programmer, and byte-unit terminal calculator with multi-base breakdown (Hex, Bin, Oct, Bytes) |
 | `nova history` | Analytics | Shell history intelligence & command productivity analytics with horizontal bar charts and categorization |
 | `nova serve` | Network | Zero-config static HTTP web server with auto-failover ports, SPA routing, terminal QR codes, and live logs |
@@ -82,9 +88,9 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 ### Pre-Compiled Binaries
 Download the latest release tarball or zip for your operating system and architecture from the [Releases](https://github.com/ngaarch/nova/releases) page:
 
-- **Linux**: `nova_1.8.0_linux_amd64.tar.gz` | `nova_1.8.0_linux_arm64.tar.gz`
-- **macOS**: `nova_1.8.0_darwin_amd64.tar.gz` | `nova_1.8.0_darwin_arm64.tar.gz`
-- **Windows**: `nova_1.8.0_windows_amd64.zip` | `nova_1.8.0_windows_arm64.zip`
+- **Linux**: `nova_1.9.0_linux_amd64.tar.gz` | `nova_1.9.0_linux_arm64.tar.gz`
+- **macOS**: `nova_1.9.0_darwin_amd64.tar.gz` | `nova_1.9.0_darwin_arm64.tar.gz`
+- **Windows**: `nova_1.9.0_windows_amd64.zip` | `nova_1.9.0_windows_arm64.zip`
 
 Extract and place the `nova` binary into your system `PATH` (e.g., `/usr/local/bin`).
 
@@ -228,6 +234,47 @@ nova serve
 
 # Serve single page application (SPA) with CORS
 nova serve ./dist --port 3000 --spa --cors
+```
+
+### 11. Markdown Document Reader (`nova md`)
+```bash
+# Render markdown document with rich typography and syntax code blocks
+nova md README.md
+
+# Extract and view Table of Contents
+nova md README.md --toc
+
+# Reflow text wrapping to 90 columns or open in interactive pager
+nova md README.md -w 90
+nova md CHANGELOG.md --pager
+```
+
+### 12. Developer Notes & TODO Tracker (`nova note`)
+```bash
+# List all notes and overall task checklist progress
+nova note
+
+# Quick-capture a new note with tags and markdown checklist
+nova note add "Release Sprint" -t dev,v1.9 -c "- [ ] Write tests
+- [ ] Update docs"
+
+# View consolidated TODO dashboard across all notes
+nova note todo
+
+# Check or uncheck a task directly from the CLI
+nova note toggle release-sprint 1
+```
+
+### 13. SSL/TLS Certificate & JWT Auditor (`nova cert`)
+```bash
+# Inspect remote TLS certificate chain, SANs, and expiration countdown
+nova cert inspect github.com:443
+
+# Verify local certificate file
+nova cert inspect server.crt
+
+# Decode JSON Web Token (JWT) claims and verify expiry
+nova cert jwt <token>
 ```
 
 ---
