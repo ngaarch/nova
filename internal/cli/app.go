@@ -13,6 +13,7 @@ import (
 	"nova/internal/commands/cat"
 	certcmd "nova/internal/commands/cert"
 	"nova/internal/commands/clean"
+	colorcmd "nova/internal/commands/color"
 	"nova/internal/commands/completion"
 	"nova/internal/commands/cp"
 	"nova/internal/commands/diff"
@@ -35,8 +36,10 @@ import (
 	qrcmd "nova/internal/commands/qr"
 	"nova/internal/commands/rm"
 	runcmd "nova/internal/commands/run"
+	scancmd "nova/internal/commands/scan"
 	servecmd "nova/internal/commands/serve"
 	"nova/internal/commands/stat"
+	stresscmd "nova/internal/commands/stress"
 	"nova/internal/commands/sysinfo"
 	topcmd "nova/internal/commands/top"
 	"nova/internal/commands/touch"
@@ -101,6 +104,9 @@ func (a *App) registerRoadmapCommands() {
 		mdcmd.Command(),
 		notecmd.Command(),
 		certcmd.Command(),
+		scancmd.Command(),
+		stresscmd.Command(),
+		colorcmd.Command(),
 	}
 }
 

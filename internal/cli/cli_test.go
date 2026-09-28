@@ -564,6 +564,42 @@ func TestAppExecuteV19Commands(t *testing.T) {
 	}
 }
 
+func TestAppExecuteV20Commands(t *testing.T) {
+	app := NewApp()
 
+	// 1. Test scan
+	tmpDir := t.TempDir()
+	secretFile := filepath.Join(tmpDir, "credentials.env")
+	_ = os.WriteFile(secretFile, []byte("AWS_SECRET_KEY=AKIAIOSFODNN7EXAMPLE\n"), 0644)
 
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"scan", tmpDir, "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for scan, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "FILE") || !strings.Contains(stdout.String(), "SEVERITY") {
+		t.Errorf("expected FILE and SEVERITY in scan output, got: %s", stdout.String())
+	}
 
+	// 2. Test stress
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"stress", "--duration=50ms", "--threads=1", "--algo=sha256", "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for stress, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "SHA-256") || !strings.Contains(stdout.String(), "WORKLOAD") {
+		t.Errorf("expected SHA-256 and WORKLOAD in stress output, got: %s", stdout.String())
+	}
+
+	// 3. Test color
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"color", "--mode=contrast", "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for color, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "FG_NAME") || !strings.Contains(stdout.String(), "PASS_AA") {
+		t.Errorf("expected FG_NAME and PASS_AA in color output, got: %s", stdout.String())
+	}
+}
