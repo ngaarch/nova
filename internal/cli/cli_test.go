@@ -474,4 +474,53 @@ func TestAppExecuteV17Commands(t *testing.T) {
 	}
 }
 
+func TestAppExecuteV18Commands(t *testing.T) {
+	app := NewApp()
+
+	// 1. Test calc plain & dashboard
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"calc", "2^16 + 1024", "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for calc plain, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "66560") {
+		t.Errorf("expected 66560 in calc plain output, got: %s", stdout.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"calc", "2^16 + 1024", "--color=always"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for calc dashboard, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "66560") || !strings.Contains(stdout.String(), "0x10400") {
+		t.Errorf("expected 66560 and 0x10400 in calc dashboard output, got: %s", stdout.String())
+	}
+
+	// 2. Test history
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"history", "--top=5", "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for history, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "SHELL") && !strings.Contains(stdout.String(), "COMMAND") && !strings.Contains(stdout.String(), "No shell history") {
+		t.Errorf("expected history output header or empty notice, got: %s", stdout.String())
+	}
+
+	// 3. Test serve (--once)
+	tmpDir := t.TempDir()
+	_ = os.WriteFile(filepath.Join(tmpDir, "index.html"), []byte("<h1>Nova Server</h1>"), 0644)
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"serve", tmpDir, "--once", "--port=0"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for serve, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "Local URL:") || !strings.Contains(stdout.String(), "Serving:") {
+		t.Errorf("expected Local URL: and Serving: in serve output, got: %s", stdout.String())
+	}
+}
+
+
 
