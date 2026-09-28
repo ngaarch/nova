@@ -23,6 +23,8 @@ PHASE 15 Workspace Hygiene & Archive Packaging (`clean`)    [COMPLETED]
 PHASE 16 Live Monitoring & Task Automation (`watch`)        [COMPLETED]
 PHASE 17 Integrity & Binary Inspection (`hash`, `hex`)          [COMPLETED]
 PHASE 18 Environment Telemetry & Next-Gen TUI (`env`, TUI v1.5) [COMPLETED]
+PHASE 19 Network Telemetry & HTTP Inspection (`http`)           [COMPLETED]
+PHASE 20 Git Productivity Dashboard & Terminal QR (`git`, `qr`) [COMPLETED]
 ```
 
 ---
@@ -394,6 +396,49 @@ PHASE 18 Environment Telemetry & Next-Gen TUI (`env`, TUI v1.5) [COMPLETED]
 - Environment variable secrets verified masked by default.
 - 100% unit test coverage across all new packages.
 - Zero race conditions or vet warnings.
+
+---
+
+## Phase 19 — Network Telemetry & HTTP Inspection (`http`)
+
+**Goal:** Provide native HTTP request execution with network latency breakdown and response preview.
+
+**Tasks:**
+- Implement `nova http` (aliases: `fetch`, `curl`, `request`):
+  - Request methods: GET, POST, PUT, DELETE, HEAD, PATCH (`-X`).
+  - Network latency tracing waterfall: DNS lookup, TCP connect, TLS handshake, TTFB, and Transfer latency.
+  - Formatted and syntax-highlighted responses with pretty JSON formatting.
+  - Custom headers (`-H`), request body payload (`-d`), file upload (`--data-file`), output to file (`-o`).
+  - Headless automation with `--plain` and structured `--json`.
+
+**Exit Gate:**
+- Verified against test HTTP servers across GET, POST, headers, and output files.
+- 100% unit test coverage and clean vet.
+
+---
+
+## Phase 20 — Git Productivity Dashboard & Terminal QR (`git`, `qr`, TUI v1.6)
+
+**Goal:** Provide repository health visibility, instant terminal QR sharing, and interactive Git diff navigation.
+
+**Tasks:**
+- Implement `nova git` (aliases: `gstatus`, `glog`, `repo`):
+  - Repository status dashboard (branch, tracking status, ahead/behind counters, staged, unstaged, untracked).
+  - Compact commit history graph (`nova git log`).
+  - Branch listing (`nova git branch`).
+- Implement `nova qr` (aliases: `qrcode`):
+  - Pure Go standard library QR matrix generation (Levels L/M, Versions 1-7).
+  - High-resolution terminal half-block rendering (`▀`, `▄`, `█`, ` `) with quiet zone border.
+  - Inversion mode (`-i`) and file input (`-f`).
+- Interactive TUI Supercharging:
+  - Inline Git diff viewer (`D` key) rendering colorized unified diff directly in preview pane.
+  - Real-time Git branch and dirty badges in header.
+  - Palette integration: `:diff` command.
+
+**Exit Gate:**
+- 100% test pass across git, qr, and interactive diff tests.
+- QR codes verified scannable and format compliant.
+
 
 
 

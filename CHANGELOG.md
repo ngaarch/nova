@@ -4,6 +4,34 @@ All notable changes to `nova` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-09-28
+
+### Added
+- **HTTP Client & Latency Telemetry (`nova http` / `nova fetch` / `nova curl`)**:
+  - Full HTTP request suite supporting `GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `PATCH` (`-X`).
+  - Network latency tracing waterfall: DNS lookup, TCP connect, TLS handshake, TTFB (server processing), and content transfer times.
+  - Formatted and syntax-highlighted responses with pretty JSON formatting.
+  - Custom headers (`-H`), request body payload (`-d`), file upload (`--data-file`), output to file (`-o`).
+  - Headless automation with `--plain` and structured `--json`.
+
+- **Pure Go Terminal QR Code Generator (`nova qr` / `nova qrcode`)**:
+  - Encodes URLs, text, Wi-Fi configuration strings into high-resolution Unicode half-blocks (`▀`, `▄`, `█`, ` `) for instant phone camera scanning off the screen.
+  - Multi-version automatic matrix expansion with Reed-Solomon Error Correction Level M.
+  - File input (`-f`), inversion mode (`-i`), quiet zone control (`-q`), ASCII `--plain`, and boolean 2D array `--json`.
+
+- **Git Productivity Dashboard (`nova git` / `nova gstatus` / `nova glog`)**:
+  - Repository health dashboard: branch name, tracking branch, ahead/behind commit counter.
+  - Clear categorization cards: Staged (`+`), Unstaged (`~`), Untracked (`?`), and clean state indicator.
+  - Compact commit history graph log (`nova git log -n 10`).
+  - Branch overview (`nova git branch`).
+
+- **Interactive TUI Supercharging (`nova interactive`)**:
+  - **Inline Git Diff Preview (`D` key)**: Instantly preview uncommitted Git changes with colorized unified diff directly in the right preview pane!
+  - **Real-Time Git Status in Header**: Displays current branch and modified file count dynamically.
+  - **Command Palette Expansion**: `:diff` command added to palette.
+
+---
+
 ## [1.5.0] - 2026-09-28
 
 ### Added

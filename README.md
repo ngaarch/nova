@@ -38,10 +38,13 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 
 | Command | Category | Description |
 |---|---|---|
-| `nova` / `nova interactive` | Explorer | Interactive dual-pane terminal file browser with live syntax previews, command palette, metadata inspector, bookmarks, and fuzzy search |
+| `nova` / `nova interactive` | Explorer | Interactive dual-pane terminal file browser with live syntax previews, git diffs (`D`), command palette, metadata inspector, bookmarks, and fuzzy search |
 | `nova ls` | Inspection | Modern directory listing with compact responsive grid, table (`-l`), sorting, and git badges |
 | `nova cat` | Viewer | Streaming file viewer with syntax highlighting, line numbers, pagination, and hex dumps (`--hex`) |
 | `nova grep` | Search | Concurrent multi-threaded regex/text content search with binary skipping and neon match highlights |
+| `nova http` | Network | Full HTTP testing client with latency tracing waterfall (DNS, TCP, TLS, TTFB), headers, and syntax preview |
+| `nova qr` | Sharing | Pure Go high-resolution terminal QR code generator using Unicode half-blocks for instant camera scanning |
+| `nova git` | Productivity | Git repository health dashboard, staged/unstaged changes, ahead/behind counters, and commit graph |
 | `nova hash` | Cryptography | Multi-algorithm checksum engine (SHA-256, SHA-512, SHA-1, MD5, CRC32) with verification (`-c`) and recursive tree hashing |
 | `nova hex` | Inspection | Colorized canonical hex dump viewer with byte categorization, configurable grouping, offsets, and ASCII panel |
 | `nova env` | Telemetry | Developer environment & secret auditor with automatic credential masking, filtering, and shell export generators |
@@ -70,9 +73,9 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 ### Pre-Compiled Binaries
 Download the latest release tarball or zip for your operating system and architecture from the [Releases](https://github.com/ngaarch/nova/releases) page:
 
-- **Linux**: `nova_1.5.0_linux_amd64.tar.gz` | `nova_1.5.0_linux_arm64.tar.gz`
-- **macOS**: `nova_1.5.0_darwin_amd64.tar.gz` | `nova_1.5.0_darwin_arm64.tar.gz`
-- **Windows**: `nova_1.5.0_windows_amd64.zip` | `nova_1.5.0_windows_arm64.zip`
+- **Linux**: `nova_1.6.0_linux_amd64.tar.gz` | `nova_1.6.0_linux_arm64.tar.gz`
+- **macOS**: `nova_1.6.0_darwin_amd64.tar.gz` | `nova_1.6.0_darwin_arm64.tar.gz`
+- **Windows**: `nova_1.6.0_windows_amd64.zip` | `nova_1.6.0_windows_arm64.zip`
 
 Extract and place the `nova` binary into your system `PATH` (e.g., `/usr/local/bin`).
 
