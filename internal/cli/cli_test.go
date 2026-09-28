@@ -412,4 +412,31 @@ func TestAppExecuteV15Commands(t *testing.T) {
 	}
 }
 
+func TestAppExecuteV16Commands(t *testing.T) {
+	app := NewApp()
+	tmpDir := t.TempDir()
+
+	// 1. Test QR
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"qr", "--plain", "https://nova.dev"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for qr, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "##") {
+		t.Errorf("expected ## in plain QR output")
+	}
+
+	// 2. Test Git Status
+	stdout.Reset()
+	stderr.Reset()
+	// Current directory is a git repo
+	code = app.Run([]string{"git", "status", "--plain", "."}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for git status, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "branch:") {
+		t.Errorf("expected 'branch:' in git output, got: %s", stdout.String())
+	}
+}
+
 

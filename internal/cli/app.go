@@ -17,13 +17,16 @@ import (
 	"nova/internal/commands/du"
 	"nova/internal/commands/env"
 	"nova/internal/commands/find"
+	gitcmd "nova/internal/commands/git"
 	"nova/internal/commands/grep"
 	"nova/internal/commands/hash"
 	"nova/internal/commands/hex"
+	httpcmd "nova/internal/commands/http"
 	"nova/internal/commands/interactive"
 	"nova/internal/commands/ls"
 	"nova/internal/commands/mkdir"
 	"nova/internal/commands/mv"
+	qrcmd "nova/internal/commands/qr"
 	"nova/internal/commands/rm"
 	"nova/internal/commands/stat"
 	"nova/internal/commands/sysinfo"
@@ -77,6 +80,9 @@ func (a *App) registerRoadmapCommands() {
 		hash.Command(),
 		hex.Command(),
 		env.Command(),
+		gitcmd.Command(),
+		httpcmd.Command(),
+		qrcmd.Command(),
 	}
 }
 
