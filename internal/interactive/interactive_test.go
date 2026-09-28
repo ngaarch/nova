@@ -1,6 +1,7 @@
 package interactive
 
 import (
+	"archive/zip"
 	"bytes"
 	"os"
 	"path/filepath"
@@ -598,5 +599,91 @@ func TestInteractiveFuzzyFinder(t *testing.T) {
 		t.Errorf("expected ActionMessage to contain Jumped to:, got: %s", m.ActionMessage)
 	}
 }
+
+func TestInteractiveZipPreview(t *testing.T) {
+	tmpDir := t.TempDir()
+	zipPath := filepath.Join(tmpDir, "bundle.zip")
+
+	// Create a test zip file
+	f, err := os.Create(zipPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	zw := zip.NewWriter(f)
+	w1, err := zw.Create("hello.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = w1.Write([]byte("Hello, world! Welcome to Nova interactive zip preview!"))
+	w2, err := zw.Create("folder/test.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = w2.Write([]byte("package test\n"))
+	_ = zw.Close()
+	_ = f.Close()
+
+	fi, err := os.Stat(zipPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	entry := &Entry{
+		Name:    "bundle.zip",
+		Path:    zipPath,
+		Size:    fi.Size(),
+		ModTime: fi.ModTime(),
+	}
+
+	th := theme.Get("default")
+	lines := LoadPreview(entry, 80, 20, th, terminal.ColorNone, false)
+	joined := strings.Join(lines, "\n")
+
+	if !strings.Contains(joined, "Archive: bundle.zip") {
+		t.Errorf("expected zip archive banner in preview, got: %s", joined)
+	}
+	if !strings.Contains(joined, "hello.txt") || !strings.Contains(joined, "test.go") {
+		t.Errorf("expected zip file contents in preview, got: %s", joined)
+	}
+}
+
+func TestInteractiveCalcCommand(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	th := theme.Get("default")
+	m, err := NewModel(tmpDir, 80, 24, false, th, terminal.ColorNone, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 1. Valid calc expression
+	err = m.ExecuteCommand(":calc 2^8 + 100")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(m.ActionMessage, "356") || !strings.Contains(m.ActionMessage, "0x164") {
+		t.Errorf("expected 356 and 0x164 in ActionMessage, got: %q", m.ActionMessage)
+	}
+
+	// 2. Syntax error handling
+	err = m.ExecuteCommand(":calc 10 + * 2")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(m.ActionMessage, "Calc error:") {
+		t.Errorf("expected Calc error in ActionMessage, got: %q", m.ActionMessage)
+	}
+
+	// 3. History and Serve command palette tips
+	_ = m.ExecuteCommand(":history")
+	if !strings.Contains(m.ActionMessage, "nova history") {
+		t.Errorf("expected history tip, got: %q", m.ActionMessage)
+	}
+
+	_ = m.ExecuteCommand(":serve")
+	if !strings.Contains(m.ActionMessage, "nova serve") {
+		t.Errorf("expected serve tip, got: %q", m.ActionMessage)
+	}
+}
+
 
 

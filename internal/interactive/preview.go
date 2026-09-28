@@ -1,6 +1,7 @@
 package interactive
 
 import (
+	"archive/zip"
 	"bufio"
 	"bytes"
 	"fmt"
@@ -104,6 +105,14 @@ func loadFilePreview(entry *Entry, width, height int, th *theme.Theme, profile t
 	if entry.Size > maxPreviewSize {
 		msg := fmt.Sprintf("  [File exceeds 20MB (%s) — preview omitted]", renderer.FormatSize(entry.Size, true))
 		return []string{th.Format(theme.RoleWarning, msg, profile)}
+	}
+
+	// Archive preview for zip/jar files
+	lowerName := strings.ToLower(entry.Name)
+	if !forceHex && (strings.HasSuffix(lowerName, ".zip") || strings.HasSuffix(lowerName, ".jar")) {
+		if zipLines, ok := loadZipPreview(entry, width, height, th, profile); ok {
+			return zipLines
+		}
 	}
 
 	f, err := os.Open(entry.Path)
@@ -212,3 +221,71 @@ func LoadDiffPreview(entry *Entry, width, height int, th *theme.Theme, profile t
 	}
 	return lines
 }
+
+func loadZipPreview(entry *Entry, width, height int, th *theme.Theme, profile terminal.ColorProfile) ([]string, bool) {
+	r, err := zip.OpenReader(entry.Path)
+	if err != nil {
+		return nil, false
+	}
+	defer r.Close()
+
+	var lines []string
+	var totalUncompressed uint64
+	var totalCompressed uint64
+	for _, f := range r.File {
+		totalUncompressed += f.UncompressedSize64
+		totalCompressed += f.CompressedSize64
+	}
+
+	savings := 0.0
+	if totalUncompressed > 0 {
+		savings = (1.0 - float64(totalCompressed)/float64(totalUncompressed)) * 100.0
+		if savings < 0 {
+			savings = 0
+		}
+	}
+
+	banner := fmt.Sprintf("📦 Archive: %s (%d items, %s -> %s, %.1f%% saved)",
+		entry.Name, len(r.File),
+		renderer.FormatSize(int64(totalCompressed), true),
+		renderer.FormatSize(int64(totalUncompressed), true),
+		savings)
+	lines = append(lines, th.Format(theme.RoleAccent, renderer.Truncate(banner, width, "…"), profile))
+	lines = append(lines, "")
+
+	if len(r.File) == 0 {
+		lines = append(lines, th.Format(theme.RoleMuted, "  (empty archive)", profile))
+		return lines, true
+	}
+
+	maxItems := height - len(lines)
+	if maxItems < 1 {
+		maxItems = 1
+	}
+
+	for i, f := range r.File {
+		if i >= maxItems {
+			remaining := len(r.File) - i
+			lines = append(lines, th.Format(theme.RoleMuted, fmt.Sprintf("  … and %d more items", remaining), profile))
+			break
+		}
+
+		icon := "📄 "
+		role := theme.RoleRegularFile
+		if f.FileInfo().IsDir() {
+			icon = "📁 "
+			role = theme.RoleDirectory
+		}
+
+		sizeStr := renderer.FormatSize(int64(f.UncompressedSize64), true)
+		nameWidth := width - 16
+		if nameWidth < 8 {
+			nameWidth = 8
+		}
+		itemLine := fmt.Sprintf("  %s%-*s  %6s", icon, nameWidth, renderer.Truncate(f.Name, nameWidth, "…"), sizeStr)
+		lines = append(lines, th.Format(role, renderer.Truncate(itemLine, width, "…"), profile))
+	}
+
+	return lines, true
+}
+

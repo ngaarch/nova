@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	calccmd "nova/internal/commands/calc"
 	"nova/internal/git"
 	"nova/internal/terminal"
 	"nova/internal/theme"
@@ -307,6 +308,30 @@ func (m *Model) ExecuteCommand(rawCmd string) error {
 		m.SetActionMessage("Tip: run 'nova net' in terminal for network latency diagnostics")
 	case "run", "tasks":
 		m.SetActionMessage("Tip: run 'nova run' in terminal to orchestrate project tasks")
+	case "calc", "math", "eval", "expr":
+		if len(parts) > 1 {
+			expr := strings.TrimSpace(trimmed[len(parts[0]):])
+			val, err := calccmd.Evaluate(expr)
+			if err != nil {
+				m.SetActionMessage("Calc error: " + err.Error())
+			} else {
+				res := calccmd.FormatResult(expr, val, calccmd.Options{Precision: 6})
+				extra := ""
+				if res.IsInteger && res.Hex != "" {
+					extra = fmt.Sprintf(" [hex: %s | bin: %s]", res.Hex, res.Binary)
+					if res.HumanBytes != "" {
+						extra += fmt.Sprintf(" (%s)", res.HumanBytes)
+					}
+				}
+				m.SetActionMessage(fmt.Sprintf("%s = %s%s", expr, res.Formatted, extra))
+			}
+		} else {
+			m.SetActionMessage("Usage: :calc <expression> (e.g. :calc 2^16 + 1024)")
+		}
+	case "history", "hist":
+		m.SetActionMessage("Tip: run 'nova history' in terminal for shell productivity analytics")
+	case "serve", "http":
+		m.SetActionMessage("Tip: run 'nova serve' in terminal for zero-config web server with QR code")
 	default:
 		m.SetActionMessage("Unknown command: " + parts[0])
 	}
