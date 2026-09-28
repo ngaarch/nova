@@ -26,10 +26,13 @@ import (
 	"nova/internal/commands/ls"
 	"nova/internal/commands/mkdir"
 	"nova/internal/commands/mv"
+	netcmd "nova/internal/commands/net"
 	qrcmd "nova/internal/commands/qr"
 	"nova/internal/commands/rm"
+	runcmd "nova/internal/commands/run"
 	"nova/internal/commands/stat"
 	"nova/internal/commands/sysinfo"
+	topcmd "nova/internal/commands/top"
 	"nova/internal/commands/touch"
 	"nova/internal/commands/tree"
 	"nova/internal/commands/watch"
@@ -83,6 +86,9 @@ func (a *App) registerRoadmapCommands() {
 		gitcmd.Command(),
 		httpcmd.Command(),
 		qrcmd.Command(),
+		topcmd.Command(),
+		netcmd.Command(),
+		runcmd.Command(),
 	}
 }
 

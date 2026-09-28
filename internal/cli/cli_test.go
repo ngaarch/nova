@@ -438,4 +438,40 @@ func TestAppExecuteV16Commands(t *testing.T) {
 	}
 }
 
+func TestAppExecuteV17Commands(t *testing.T) {
+	app := NewApp()
+
+	// 1. Test top
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"top", "--limit=2", "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for top, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "PID") {
+		t.Errorf("expected PID in top output, got: %s", stdout.String())
+	}
+
+	// 2. Test net ping
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"net", "ping", "127.0.0.1:0", "-c", "1", "--plain", "-W", "200ms"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for net ping, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "SEQ") {
+		t.Errorf("expected SEQ in net ping output, got: %s", stdout.String())
+	}
+
+	// 3. Test run (in current nova repo with go.mod)
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"run", "--plain"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for run, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "NAME") || !strings.Contains(stdout.String(), "test") {
+		t.Errorf("expected NAME and test in run tasks output, got: %s", stdout.String())
+	}
+}
+
 

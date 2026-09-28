@@ -174,12 +174,15 @@ func buildCommand(task *Task, extraArgs []string) (*exec.Cmd, error) {
 		}
 		return exec.Command("go", task.Name), nil
 	default:
-		// Shell execution
 		fullCmd := task.Command
 		if len(extraArgs) > 0 {
 			fullCmd += " " + strings.Join(extraArgs, " ")
 		}
-		return exec.Command("sh", "-c", fullCmd), nil
+		parts := strings.Fields(fullCmd)
+		if len(parts) == 0 {
+			return nil, fmt.Errorf("empty command for task %s", task.Name)
+		}
+		return exec.Command(parts[0], parts[1:]...), nil
 	}
 }
 
@@ -188,6 +191,7 @@ func DiscoverTasks(dir string) ([]Task, error) {
 	if dir == "" {
 		dir = "."
 	}
+	dir = findWorkspaceRoot(dir)
 
 	var tasks []Task
 
@@ -330,4 +334,26 @@ func parseTaskfile(content, source string) []Task {
 		}
 	}
 	return tasks
+}
+
+func findWorkspaceRoot(startDir string) string {
+	abs, err := filepath.Abs(startDir)
+	if err != nil {
+		return startDir
+	}
+
+	curr := abs
+	for {
+		for _, indicator := range []string{"go.mod", "package.json", "Makefile", "Cargo.toml", "Taskfile.yml", "Taskfile.yaml"} {
+			if _, err := os.Stat(filepath.Join(curr, indicator)); err == nil {
+				return curr
+			}
+		}
+		parent := filepath.Dir(curr)
+		if parent == curr {
+			break
+		}
+		curr = parent
+	}
+	return startDir
 }
