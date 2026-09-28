@@ -143,6 +143,9 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 				} else if m.InspectorActive {
 					m.InspectorActive = false
 					m.SetActionMessage("")
+				} else if m.FuzzyActive {
+					m.FuzzyActive = false
+					m.SetActionMessage("Search canceled")
 				} else if m.FilterActive {
 					m.FilterActive = false
 					m.FilterQuery = ""
@@ -179,9 +182,21 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 
 				switch b3 {
 				case 'A': // Up arrow
-					m.MoveCursor(-1)
+					if m.FuzzyActive {
+						if m.FuzzyIndex > 0 {
+							m.FuzzyIndex--
+						}
+					} else {
+						m.MoveCursor(-1)
+					}
 				case 'B': // Down arrow
-					m.MoveCursor(1)
+					if m.FuzzyActive {
+						if m.FuzzyIndex < len(m.FuzzyResults)-1 {
+							m.FuzzyIndex++
+						}
+					} else {
+						m.MoveCursor(1)
+					}
 				case 'C': // Right arrow
 					_, _ = m.EnterSelected()
 				case 'D': // Left arrow
@@ -393,10 +408,37 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 			continue
 		}
 
+		// In Fuzzy Finder mode
+		if m.FuzzyActive {
+			if b == '\r' || b == '\n' {
+				m.SelectFuzzyResult()
+			} else if b == 127 || b == 8 { // Backspace
+				if len(m.FuzzyQuery) > 0 {
+					m.FuzzyQuery = m.FuzzyQuery[:len(m.FuzzyQuery)-1]
+					m.UpdateFuzzyResults()
+				} else {
+					m.FuzzyActive = false
+				}
+			} else if b == 27 { // Esc
+				m.FuzzyActive = false
+				m.SetActionMessage("Search canceled")
+			} else if b == 9 { // Tab: cycle next result
+				if len(m.FuzzyResults) > 0 {
+					m.FuzzyIndex = (m.FuzzyIndex + 1) % len(m.FuzzyResults)
+				}
+			} else if b >= 32 && b <= 126 {
+				m.FuzzyQuery += string(b)
+				m.UpdateFuzzyResults()
+			}
+			continue
+		}
+
 		// Normal navigation mode
 		switch b {
 		case 'q', 3: // 'q' or Ctrl+C
 			return nil
+		case 'f', 16: // 'f' or Ctrl+P: Fuzzy search
+			m.OpenFuzzyFinder()
 		case 'j':
 			m.MoveCursor(1)
 		case 'k':

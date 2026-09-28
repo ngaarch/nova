@@ -561,4 +561,42 @@ func TestInteractiveDiffMode(t *testing.T) {
 	}
 }
 
+func TestInteractiveFuzzyFinder(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	th := theme.Get("default")
+	m, err := NewModel(tmpDir, 80, 24, false, th, terminal.ColorNone, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 1. Test opening fuzzy finder: 'f'
+	in := bytes.NewReader([]byte{'f', 'q'})
+	var out bytes.Buffer
+	_ = RunLoop(m, in, &out)
+	if !m.FuzzyActive {
+		t.Errorf("expected FuzzyActive true after pressing 'f'")
+	}
+
+	// 2. Render while FuzzyActive
+	frame := Render(m)
+	if !strings.Contains(frame, "Fuzzy File Finder") {
+		t.Errorf("expected Fuzzy File Finder in frame, got: %s", frame)
+	}
+
+	// 3. Test typing and selection jump
+	m.FuzzyQuery = "sub"
+	m.UpdateFuzzyResults()
+	if len(m.FuzzyResults) == 0 {
+		t.Errorf("expected matches for 'sub'")
+	}
+
+	m.SelectFuzzyResult()
+	if m.FuzzyActive {
+		t.Errorf("expected FuzzyActive false after SelectFuzzyResult")
+	}
+	if !strings.Contains(m.ActionMessage, "Jumped to:") {
+		t.Errorf("expected ActionMessage to contain Jumped to:, got: %s", m.ActionMessage)
+	}
+}
+
 

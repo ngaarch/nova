@@ -57,6 +57,10 @@ type Model struct {
 	BookmarkIndex        int
 	PreviewCollapsed     bool
 	Tick                 int
+	FuzzyActive          bool
+	FuzzyQuery           string
+	FuzzyResults         []string
+	FuzzyIndex           int
 	EditorRunner         func(path string) error
 }
 
@@ -291,6 +295,18 @@ func (m *Model) ExecuteCommand(rawCmd string) error {
 		m.ToggleHex()
 	case "diff":
 		m.ToggleDiff()
+	case "find", "fuzzy":
+		m.OpenFuzzyFinder()
+	case "bookmark", "bm":
+		m.AddBookmark()
+	case "jump":
+		m.JumpNextBookmark()
+	case "top", "proc":
+		m.SetActionMessage("Tip: run 'nova top' in terminal for real-time process monitor")
+	case "net", "ping":
+		m.SetActionMessage("Tip: run 'nova net' in terminal for network latency diagnostics")
+	case "run", "tasks":
+		m.SetActionMessage("Tip: run 'nova run' in terminal to orchestrate project tasks")
 	default:
 		m.SetActionMessage("Unknown command: " + parts[0])
 	}
@@ -547,4 +563,96 @@ func (m *Model) QuickHash() {
 	}
 	digest := hex.EncodeToString(h.Sum(nil))
 	m.SetActionMessage(fmt.Sprintf("SHA256: %.16s... (%s)", digest, entry.Name))
+}
+
+// OpenFuzzyFinder opens the fuzzy file finder overlay.
+func (m *Model) OpenFuzzyFinder() {
+	m.FuzzyActive = true
+	m.FuzzyQuery = ""
+	m.FuzzyIndex = 0
+	m.UpdateFuzzyResults()
+	m.HelpActive = false
+	m.InspectorActive = false
+}
+
+// UpdateFuzzyResults searches current directory recursively up to depth 3 for matching files.
+func (m *Model) UpdateFuzzyResults() {
+	query := strings.ToLower(m.FuzzyQuery)
+	var matches []string
+
+	_ = filepath.Walk(m.CurrentDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		rel, err := filepath.Rel(m.CurrentDir, path)
+		if err != nil || rel == "." {
+			return nil
+		}
+		if !m.ShowHidden && strings.HasPrefix(filepath.Base(path), ".") {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if strings.Count(rel, string(filepath.Separator)) > 3 {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if query == "" || strings.Contains(strings.ToLower(rel), query) {
+			matches = append(matches, rel)
+			if len(matches) >= 30 {
+				return filepath.SkipAll
+			}
+		}
+		return nil
+	})
+
+	m.FuzzyResults = matches
+	if m.FuzzyIndex >= len(m.FuzzyResults) {
+		if len(m.FuzzyResults) > 0 {
+			m.FuzzyIndex = len(m.FuzzyResults) - 1
+		} else {
+			m.FuzzyIndex = 0
+		}
+	}
+}
+
+// SelectFuzzyResult jumps to the focused fuzzy search result.
+func (m *Model) SelectFuzzyResult() {
+	if len(m.FuzzyResults) == 0 || m.FuzzyIndex < 0 || m.FuzzyIndex >= len(m.FuzzyResults) {
+		m.FuzzyActive = false
+		return
+	}
+	targetRel := m.FuzzyResults[m.FuzzyIndex]
+	targetAbs := filepath.Join(m.CurrentDir, targetRel)
+	m.FuzzyActive = false
+
+	fi, err := os.Stat(targetAbs)
+	if err != nil {
+		m.SetActionMessage("Jump error: " + err.Error())
+		return
+	}
+
+	if fi.IsDir() {
+		m.CurrentDir = targetAbs
+		_ = m.LoadCurrentDir()
+	} else {
+		parent := filepath.Dir(targetAbs)
+		if parent != m.CurrentDir {
+			m.CurrentDir = parent
+			_ = m.LoadCurrentDir()
+		}
+		baseName := filepath.Base(targetAbs)
+		for i, e := range m.Filtered {
+			if e.Name == baseName {
+				m.Cursor = i
+				m.AdjustScroll()
+				m.UpdatePreview()
+				break
+			}
+		}
+	}
+	m.SetActionMessage("Jumped to: " + targetRel)
 }

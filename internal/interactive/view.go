@@ -88,6 +88,8 @@ func Render(m *Model) string {
 		screen = overlayHelpModal(m, screen, width, height)
 	} else if m.InspectorActive {
 		screen = overlayInspectorModal(m, screen, width, height)
+	} else if m.FuzzyActive {
+		screen = overlayFuzzyModal(m, screen, width, height)
 	}
 
 	// Return full frame with ANSI home cursor
@@ -95,7 +97,9 @@ func Render(m *Model) string {
 }
 
 func renderHeader(m *Model, width int) string {
-	badge := m.Theme.Format(theme.RoleAccent, "[nova] ", m.Profile)
+	c1 := theme.HexRGB(0x61AFEF)
+	c2 := theme.HexRGB(0xC678DD)
+	badge := renderer.RenderGradientText("[nova]", c1, c2, true, m.Profile) + " "
 
 	// Breadcrumb path styling
 	home, _ := os.UserHomeDir()
@@ -203,8 +207,17 @@ func renderLeftCell(m *Model, row int, width int) string {
 		gitBadge = badge + " "
 	}
 
+	// Bookmark indicator
+	bmBadge := ""
+	for _, bm := range m.Bookmarks {
+		if bm == entry.Path {
+			bmBadge = m.Theme.Format(theme.RoleWarning, "🔖 ", m.Profile)
+			break
+		}
+	}
+
 	// Available space for name
-	availNameWidth := width - len(prefix) - len(selectBadge) - len(gitBadge) - len(entry.Icon) - len(sizeStr) - 2
+	availNameWidth := width - len(prefix) - len(selectBadge) - len(gitBadge) - len(bmBadge) - len(entry.Icon) - len(sizeStr) - 2
 	if availNameWidth < 4 {
 		availNameWidth = 4
 	}
@@ -220,13 +233,13 @@ func renderLeftCell(m *Model, row int, width int) string {
 	}
 
 	// Combine components
-	visibleLen := renderer.VisibleWidth(prefix + selectBadge + gitBadge + entry.Icon + truncatedName + sizeStr)
+	visibleLen := renderer.VisibleWidth(prefix + selectBadge + gitBadge + bmBadge + entry.Icon + truncatedName + sizeStr)
 	paddingSpaces := width - visibleLen
 	if paddingSpaces < 0 {
 		paddingSpaces = 0
 	}
 
-	line := prefix + selectBadge + gitBadge + entry.Icon + styledName + strings.Repeat(" ", paddingSpaces) + m.Theme.Format(sizeRole, sizeStr, m.Profile)
+	line := prefix + selectBadge + gitBadge + bmBadge + entry.Icon + styledName + strings.Repeat(" ", paddingSpaces) + m.Theme.Format(sizeRole, sizeStr, m.Profile)
 
 	if isSelected {
 		return m.Theme.Format(theme.RoleSelection, line, m.Profile)
@@ -505,6 +518,93 @@ func overlayInspectorModal(m *Model, screen []string, width, height int) []strin
 		}
 		rightPad := strings.Repeat(" ", remainder)
 
+		result[y] = leftPad + styledBox + rightPad
+	}
+
+	return result
+}
+
+func overlayFuzzyModal(m *Model, screen []string, width, height int) []string {
+	boxWidth := 56
+	if boxWidth > width-4 {
+		boxWidth = width - 4
+	}
+	if boxWidth < 20 {
+		return screen
+	}
+
+	innerW := boxWidth - 4
+	var boxLines []string
+	boxLines = append(boxLines, "╭─ 🔍 Fuzzy File Finder ────────────────────────╮")
+
+	queryDisplay := m.FuzzyQuery
+	if queryDisplay == "" {
+		queryDisplay = "Type to search files..."
+	}
+	queryLine := fmt.Sprintf("│  Search: %-36s │", renderer.Truncate(queryDisplay, innerW-10, "…"))
+	boxLines = append(boxLines, queryLine)
+	boxLines = append(boxLines, "├──────────────────────────────────────────────┤")
+
+	// Results rows (up to 8)
+	maxRows := 8
+	if len(m.FuzzyResults) == 0 {
+		boxLines = append(boxLines, fmt.Sprintf("│  %-44s│", "No matching files"))
+	} else {
+		for i := 0; i < maxRows && i < len(m.FuzzyResults); i++ {
+			p := m.FuzzyResults[i]
+			prefix := "   "
+			if i == m.FuzzyIndex {
+				prefix = " ❯ "
+			}
+			disp := renderer.Truncate(p, innerW-6, "…")
+			row := fmt.Sprintf("│ %s%-41s│", prefix, disp)
+			boxLines = append(boxLines, row)
+		}
+	}
+
+	boxLines = append(boxLines, "├──────────────────────────────────────────────┤")
+	boxLines = append(boxLines, "│  [Tab/↑/↓] Select  [Enter] Jump  [Esc] Close │")
+	boxLines = append(boxLines, "╰──────────────────────────────────────────────╯")
+
+	if !m.UnicodeSupported {
+		for i, bl := range boxLines {
+			boxLines[i] = strings.ReplaceAll(bl, "╭", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "╮", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "╰", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "╯", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "├", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "┤", "+")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "─", "-")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "│", "|")
+			boxLines[i] = strings.ReplaceAll(boxLines[i], "❯", ">")
+		}
+	}
+
+	boxHeight := len(boxLines)
+	startY := (height - boxHeight) / 2
+	startX := (width - boxWidth) / 2
+	if startY < 0 {
+		startY = 0
+	}
+	if startX < 0 {
+		startX = 0
+	}
+
+	result := make([]string, len(screen))
+	copy(result, screen)
+
+	for i, bLine := range boxLines {
+		y := startY + i
+		if y >= len(result) {
+			break
+		}
+		leftPad := strings.Repeat(" ", startX)
+		styledBox := m.Theme.Format(theme.RoleAccent, bLine, m.Profile)
+		remainder := width - startX - boxWidth
+		if remainder < 0 {
+			remainder = 0
+		}
+		rightPad := strings.Repeat(" ", remainder)
 		result[y] = leftPad + styledBox + rightPad
 	}
 
