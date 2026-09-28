@@ -6,6 +6,7 @@ import (
 	"math"
 	"net"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -154,7 +155,7 @@ func runDNS(ctx *command.Context, opts Options) error {
 func ExecutePing(opts Options) *PingResult {
 	addr := opts.Target
 	if !strings.Contains(addr, ":") {
-		addr = addr + ":80"
+		addr = net.JoinHostPort(addr, "80")
 	}
 
 	res := &PingResult{
@@ -275,7 +276,7 @@ func ExecutePortScan(target string, ports []int, timeout time.Duration) *PortSca
 			sem <- struct{}{}
 			defer func() { <-sem }()
 
-			addr := fmt.Sprintf("%s:%d", target, p)
+			addr := net.JoinHostPort(target, strconv.Itoa(p))
 			connStart := time.Now()
 			conn, err := net.DialTimeout("tcp", addr, timeout)
 			lat := time.Since(connStart)
