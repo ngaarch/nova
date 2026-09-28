@@ -53,13 +53,86 @@ func PrintHelp(ctx *Context, commands []*Command) error {
 
 	b.WriteString(th.Format(theme.RoleAccent, "Commands:", prof))
 	b.WriteString("\n")
+
+	type categoryDef struct {
+		Name     string
+		Icon     string
+		Commands []string
+	}
+
+	categories := []categoryDef{
+		{
+			Name:     "Files & Navigation",
+			Icon:     "📁",
+			Commands: []string{"ls", "tree", "cat", "head", "tail", "grep", "find", "stat", "size", "clean"},
+		},
+		{
+			Name:     "Network & Security",
+			Icon:     "🔒",
+			Commands: []string{"ping", "dig", "port", "curl", "cert", "scan"},
+		},
+		{
+			Name:     "System & Diagnostics",
+			Icon:     "⚡",
+			Commands: []string{"sysinfo", "ps", "kill", "top", "bench", "stress", "watch"},
+		},
+		{
+			Name:     "Developer & Utilities",
+			Icon:     "🛠️",
+			Commands: []string{"git", "diff", "env", "json", "yaml", "calc", "hash", "uuid", "base64", "archive", "md", "note", "color"},
+		},
+	}
+
+	cmdMap := make(map[string]*Command, len(commands))
 	for _, cmd := range commands {
-		status := ""
-		if cmd.Run == nil {
-			status = " " + th.Format(theme.RoleMuted, fmt.Sprintf("[Scheduled: Phase %d]", cmd.Phase), prof)
+		cmdMap[cmd.Name] = cmd
+	}
+
+	seen := make(map[string]bool)
+	for _, cat := range categories {
+		var matched []*Command
+		for _, name := range cat.Commands {
+			if c, ok := cmdMap[name]; ok {
+				matched = append(matched, c)
+				seen[name] = true
+			}
 		}
-		cmdName := th.Format(theme.RoleExecutable, fmt.Sprintf("%-14s", cmd.Name), prof)
-		b.WriteString(fmt.Sprintf("  %s %s%s\n", cmdName, cmd.Summary, status))
+		if len(matched) == 0 {
+			continue
+		}
+		catHeader := fmt.Sprintf("  %s %s", cat.Icon, cat.Name)
+		b.WriteString(th.Format(theme.RoleAccent, catHeader, prof))
+		b.WriteString("\n")
+		for _, cmd := range matched {
+			status := ""
+			if cmd.Run == nil {
+				status = " " + th.Format(theme.RoleMuted, fmt.Sprintf("[Scheduled: Phase %d]", cmd.Phase), prof)
+			}
+			cmdName := th.Format(theme.RoleExecutable, fmt.Sprintf("    %-14s", cmd.Name), prof)
+			b.WriteString(fmt.Sprintf("%s %s%s\n", cmdName, cmd.Summary, status))
+		}
+		b.WriteString("\n")
+	}
+
+	// Remaining / other commands
+	var others []*Command
+	for _, cmd := range commands {
+		if !seen[cmd.Name] {
+			others = append(others, cmd)
+		}
+	}
+	if len(others) > 0 {
+		b.WriteString(th.Format(theme.RoleAccent, "  📦 Other Commands", prof))
+		b.WriteString("\n")
+		for _, cmd := range others {
+			status := ""
+			if cmd.Run == nil {
+				status = " " + th.Format(theme.RoleMuted, fmt.Sprintf("[Scheduled: Phase %d]", cmd.Phase), prof)
+			}
+			cmdName := th.Format(theme.RoleExecutable, fmt.Sprintf("    %-14s", cmd.Name), prof)
+			b.WriteString(fmt.Sprintf("%s %s%s\n", cmdName, cmd.Summary, status))
+		}
+		b.WriteString("\n")
 	}
 
 	b.WriteString("\n")

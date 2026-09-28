@@ -227,7 +227,13 @@ func renderLeftCell(m *Model, row int, width int) string {
 	// Match highlighting for fuzzy search
 	var styledName string
 	if m.FilterQuery != "" {
-		styledName = renderer.HighlightFuzzyMatch(truncatedName, m.FilterQuery, m.Theme.Style(theme.RoleAccent), m.Theme.Style(role), m.Profile)
+		neon := theme.HexRGB(0x00FFD2)
+		matchStyle := theme.Style{Fg: &neon, Bold: true, Underline: true}
+		if m.Theme.Name == "neon" || m.Theme.Name == "cyberpunk" {
+			hot := theme.HexRGB(0xFF007F)
+			matchStyle = theme.Style{Fg: &hot, Bold: true, Underline: true}
+		}
+		styledName = renderer.HighlightFuzzyMatch(truncatedName, m.FilterQuery, matchStyle, m.Theme.Style(role), m.Profile)
 	} else {
 		styledName = m.Theme.Format(role, truncatedName, m.Profile)
 	}
@@ -283,7 +289,7 @@ func renderStatusBar(m *Model, width int) string {
 	}
 
 	if m.FilterActive {
-		filterPrompt := fmt.Sprintf("/filter: %s_", m.FilterQuery)
+		filterPrompt := fmt.Sprintf("  🔍 FILTER  /filter: %s_ (%d/%d matches)", m.FilterQuery, len(m.Filtered), len(m.Entries))
 		return padOrTruncate(m.Theme.Format(theme.RoleWarning, filterPrompt, m.Profile), width)
 	}
 
@@ -293,18 +299,27 @@ func renderStatusBar(m *Model, width int) string {
 	}
 
 	relTime := renderer.FormatRelativeTime(entry.ModTime)
-	details := fmt.Sprintf("  %s  %s  %s (%s)", entry.Mode.String(), renderer.FormatSize(entry.Size, true), relTime, entry.ModTime.Format("15:04:05"))
+	div := " │ "
+	if !m.UnicodeSupported {
+		div = " | "
+	}
+	pill := m.Theme.Format(theme.RoleAccent, " ● READY ", m.Profile)
+	permStr := m.Theme.Format(theme.RoleMuted, entry.Mode.String(), m.Profile)
+	sizeStr := m.Theme.Format(theme.RoleInfo, renderer.FormatSize(entry.Size, true), m.Profile)
+	timeStr := m.Theme.Format(theme.RoleMuted, fmt.Sprintf("%s (%s)", relTime, entry.ModTime.Format("15:04:05")), m.Profile)
+
+	details := fmt.Sprintf(" %s%s%s%s%s%s%s", pill, div, permStr, div, sizeStr, div, timeStr)
 	if entry.IsSymlink && entry.Target != "" {
-		details += fmt.Sprintf(" -> %s", entry.Target)
+		details += fmt.Sprintf(" -> %s", m.Theme.Format(theme.RoleSymlink, entry.Target, m.Profile))
 	}
 	if len(m.SelectedPaths) > 0 {
-		details += fmt.Sprintf("  [%d selected]", len(m.SelectedPaths))
+		details += fmt.Sprintf("  %s", m.Theme.Format(theme.RoleSuccess, fmt.Sprintf("[%d sel]", len(m.SelectedPaths)), m.Profile))
 	}
 	if len(m.Bookmarks) > 0 {
-		details += fmt.Sprintf("  [%d bm]", len(m.Bookmarks))
+		details += fmt.Sprintf("  %s", m.Theme.Format(theme.RoleWarning, fmt.Sprintf("[%d bm]", len(m.Bookmarks)), m.Profile))
 	}
 
-	return padOrTruncate(m.Theme.Format(theme.RoleInfo, details, m.Profile), width)
+	return padOrTruncate(details, width)
 }
 
 func renderFooter(m *Model, width int) string {
