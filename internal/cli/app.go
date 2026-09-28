@@ -15,8 +15,11 @@ import (
 	"nova/internal/commands/cp"
 	"nova/internal/commands/diff"
 	"nova/internal/commands/du"
+	"nova/internal/commands/env"
 	"nova/internal/commands/find"
 	"nova/internal/commands/grep"
+	"nova/internal/commands/hash"
+	"nova/internal/commands/hex"
 	"nova/internal/commands/interactive"
 	"nova/internal/commands/ls"
 	"nova/internal/commands/mkdir"
@@ -71,6 +74,9 @@ func (a *App) registerRoadmapCommands() {
 		clean.Command(),
 		archive.Command(),
 		watch.Command(),
+		hash.Command(),
+		hex.Command(),
+		env.Command(),
 	}
 }
 

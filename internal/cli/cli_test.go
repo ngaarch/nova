@@ -373,4 +373,43 @@ func TestAppExecuteV14Commands(t *testing.T) {
 	}
 }
 
+func TestAppExecuteV15Commands(t *testing.T) {
+	app := NewApp()
+	tmpDir := t.TempDir()
+	sampleFile := filepath.Join(tmpDir, "test.dat")
+	_ = os.WriteFile(sampleFile, []byte("nova v1.5.0 flagship capabilities\n"), 0644)
+
+	// 1. Test hash
+	var stdout, stderr bytes.Buffer
+	code := app.Run([]string{"hash", "--plain", sampleFile}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for hash, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), sampleFile) {
+		t.Errorf("expected filename in hash output, got: %s", stdout.String())
+	}
+
+	// 2. Test hex
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"hex", "--plain", sampleFile}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for hex, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "00000000") {
+		t.Errorf("expected offset in hex output, got: %s", stdout.String())
+	}
+
+	// 3. Test env
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run([]string{"env", "--plain", "-f", "PATH"}, strings.NewReader(""), &stdout, &stderr)
+	if code != ExitSuccess {
+		t.Errorf("expected ExitSuccess for env, got %d; stderr: %s", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "PATH=") {
+		t.Errorf("expected PATH= in env output, got: %s", stdout.String())
+	}
+}
+
 
