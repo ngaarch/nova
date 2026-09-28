@@ -685,5 +685,88 @@ func TestInteractiveCalcCommand(t *testing.T) {
 	}
 }
 
+func TestInteractiveMarkdownPreview(t *testing.T) {
+	tmpDir := t.TempDir()
+	mdPath := filepath.Join(tmpDir, "docs.md")
+	content := "# Project Roadmap\n\n## Core Engine\n- [x] Task done\n- [ ] Task pending\n- Bullet item\n> Note here\n"
+	if err := os.WriteFile(mdPath, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	fi, err := os.Stat(mdPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	entry := &Entry{
+		Name:    "docs.md",
+		Path:    mdPath,
+		Size:    fi.Size(),
+		ModTime: fi.ModTime(),
+	}
+
+	th := theme.Get("default")
+	lines := LoadPreview(entry, 80, 20, th, terminal.ColorNone, false)
+	joined := strings.Join(lines, "\n")
+
+	if !strings.Contains(joined, "MARKDOWN DOC") {
+		t.Errorf("expected MARKDOWN DOC badge in preview, got: %s", joined)
+	}
+	if !strings.Contains(joined, "ROADMAP") || !strings.Contains(joined, "Core Engine") {
+		t.Errorf("expected headings in markdown preview, got: %s", joined)
+	}
+	if !strings.Contains(joined, "[✓]") || !strings.Contains(joined, "[ ]") {
+		t.Errorf("expected checkboxes in markdown preview, got: %s", joined)
+	}
+}
+
+func TestInteractiveBookmarkNumberJumpAndPalette(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	th := theme.Get("default")
+	m, err := NewModel(tmpDir, 80, 24, false, th, terminal.ColorNone, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 1. Add bookmarks
+	m.AddBookmark()
+	subA := filepath.Join(tmpDir, "sub_a")
+	m.CurrentDir = subA
+	m.AddBookmark()
+
+	if len(m.Bookmarks) != 2 {
+		t.Fatalf("expected 2 bookmarks, got %d", len(m.Bookmarks))
+	}
+
+	// 2. Jump to bookmark 1
+	m.JumpBookmarkIndex(0)
+	if m.CurrentDir != tmpDir {
+		t.Errorf("expected CurrentDir %q after jump 0, got %q", tmpDir, m.CurrentDir)
+	}
+
+	// 3. Jump to bookmark 2
+	m.JumpBookmarkIndex(1)
+	if m.CurrentDir != subA {
+		t.Errorf("expected CurrentDir %q after jump 1, got %q", subA, m.CurrentDir)
+	}
+
+	// 4. Test v1.9 command palette tips
+	_ = m.ExecuteCommand(":md")
+	if !strings.Contains(m.ActionMessage, "nova md") {
+		t.Errorf("expected md tip, got: %q", m.ActionMessage)
+	}
+
+	_ = m.ExecuteCommand(":note")
+	if !strings.Contains(m.ActionMessage, "nova note") {
+		t.Errorf("expected note tip, got: %q", m.ActionMessage)
+	}
+
+	_ = m.ExecuteCommand(":cert")
+	if !strings.Contains(m.ActionMessage, "nova cert") {
+		t.Errorf("expected cert tip, got: %q", m.ActionMessage)
+	}
+}
+
+
 
 

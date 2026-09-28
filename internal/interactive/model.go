@@ -232,6 +232,28 @@ func (m *Model) JumpNextBookmark() {
 	m.SetActionMessage(fmt.Sprintf("Jumped to bookmark [%d/%d]: %s", m.BookmarkIndex+1, len(m.Bookmarks), filepath.Base(target)))
 }
 
+// JumpBookmarkIndex jumps directly to the bookmark at 0-based index.
+func (m *Model) JumpBookmarkIndex(idx int) {
+	if len(m.Bookmarks) == 0 {
+		m.SetActionMessage("No bookmarks saved (press 'b' to add)")
+		return
+	}
+	if idx < 0 || idx >= len(m.Bookmarks) {
+		m.SetActionMessage(fmt.Sprintf("Bookmark [%d] not found (total %d)", idx+1, len(m.Bookmarks)))
+		return
+	}
+	m.BookmarkIndex = idx
+	target := m.Bookmarks[idx]
+	m.CurrentDir = target
+	m.FilterQuery = ""
+	m.FilterActive = false
+	m.Cursor = 0
+	m.ScrollOffset = 0
+	_ = m.LoadCurrentDir()
+	m.UpdatePreview()
+	m.SetActionMessage(fmt.Sprintf("Jumped to bookmark [%d/%d]: %s", idx+1, len(m.Bookmarks), filepath.Base(target)))
+}
+
 // ExecuteCommand runs a command entered via the command palette.
 func (m *Model) ExecuteCommand(rawCmd string) error {
 	trimmed := strings.TrimSpace(rawCmd)
@@ -332,6 +354,12 @@ func (m *Model) ExecuteCommand(rawCmd string) error {
 		m.SetActionMessage("Tip: run 'nova history' in terminal for shell productivity analytics")
 	case "serve", "http":
 		m.SetActionMessage("Tip: run 'nova serve' in terminal for zero-config web server with QR code")
+	case "md", "doc":
+		m.SetActionMessage("Tip: run 'nova md <file>' in terminal for rich Markdown reader & TOC")
+	case "note", "notes", "todo":
+		m.SetActionMessage("Tip: run 'nova note' or 'nova note todo' in terminal for developer scratchpad")
+	case "cert", "ssl", "tls":
+		m.SetActionMessage("Tip: run 'nova cert <host|file>' in terminal to audit TLS certificates and JWTs")
 	default:
 		m.SetActionMessage("Unknown command: " + parts[0])
 	}

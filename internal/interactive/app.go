@@ -517,6 +517,9 @@ func RunLoop(m *Model, in io.Reader, out io.Writer) error {
 			m.AddBookmark()
 		case 'B':
 			m.JumpNextBookmark()
+		case '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			idx := int(b - '1')
+			m.JumpBookmarkIndex(idx)
 		case 'g':
 			m.MoveHome()
 		case 'G':

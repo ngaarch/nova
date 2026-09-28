@@ -162,6 +162,9 @@ func loadFilePreview(entry *Entry, width, height int, th *theme.Theme, profile t
 	sizeStr := renderer.FormatSize(entry.Size, true)
 
 	badge := fmt.Sprintf("[%s] %s • %s", strings.ToUpper(lang), sizeStr, relTime)
+	if lang == "markdown" {
+		badge = fmt.Sprintf("[MARKDOWN DOC] %s • %s", sizeStr, relTime)
+	}
 	lines = append(lines, th.Format(theme.RoleAccent, renderer.Truncate(badge, width, "…"), profile))
 	lines = append(lines, "")
 
@@ -171,6 +174,34 @@ func loadFilePreview(entry *Entry, width, height int, th *theme.Theme, profile t
 	lineNum := 1
 	for scanner.Scan() && len(lines) < height {
 		rawLine := scanner.Text()
+		trimmed := strings.TrimSpace(rawLine)
+
+		if lang == "markdown" {
+			var formattedLine string
+			if strings.HasPrefix(trimmed, "# ") {
+				formattedLine = th.Format(theme.RoleAccent, "  # "+strings.ToUpper(trimmed[2:]), profile)
+			} else if strings.HasPrefix(trimmed, "## ") {
+				formattedLine = th.Format(theme.RoleDocument, "  ## "+trimmed[3:], profile)
+			} else if strings.HasPrefix(trimmed, "### ") {
+				formattedLine = th.Format(theme.RoleAccent, "  ### "+trimmed[4:], profile)
+			} else if strings.HasPrefix(trimmed, "- [x]") || strings.HasPrefix(trimmed, "* [x]") {
+				formattedLine = "  " + th.Format(theme.RoleSuccess, "[✓]", profile) + " " + trimmed[5:]
+			} else if strings.HasPrefix(trimmed, "- [ ]") || strings.HasPrefix(trimmed, "* [ ]") {
+				formattedLine = "  " + th.Format(theme.RoleWarning, "[ ]", profile) + " " + trimmed[5:]
+			} else if strings.HasPrefix(trimmed, "- ") || strings.HasPrefix(trimmed, "* ") {
+				formattedLine = "  " + th.Format(theme.RoleAccent, "•", profile) + " " + trimmed[2:]
+			} else if strings.HasPrefix(trimmed, ">") {
+				formattedLine = "  " + th.Format(theme.RoleAccent, "│", profile) + " " + strings.TrimSpace(trimmed[1:])
+			} else if trimmed == "---" {
+				formattedLine = "  " + th.Format(theme.RoleMuted, strings.Repeat("─", width-6), profile)
+			} else {
+				formattedLine = "  " + syntax.HighlightLine(rawLine, lang, synState, th, profile)
+			}
+			lines = append(lines, renderer.Truncate(formattedLine, width, "…"))
+			lineNum++
+			continue
+		}
+
 		highlighted := syntax.HighlightLine(rawLine, lang, synState, th, profile)
 
 		numPrefix := th.Format(theme.RoleMuted, fmt.Sprintf("%3d │ ", lineNum), profile)
