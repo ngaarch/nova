@@ -22,9 +22,15 @@ func getDiskSpace(path string) DiskSpace {
 		return DiskSpace{Available: false}
 	}
 
-	total := stat.Blocks * uint64(stat.Bsize)
-	free := stat.Bavail * uint64(stat.Bsize)
-	used := total - free
+	total := uint64(stat.Blocks) * uint64(stat.Bsize)
+	var free uint64
+	if stat.Bavail > 0 {
+		free = uint64(stat.Bavail) * uint64(stat.Bsize)
+	}
+	var used uint64
+	if total >= free {
+		used = total - free
+	}
 
 	var pct float64
 	if total > 0 {
