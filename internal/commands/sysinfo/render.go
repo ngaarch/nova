@@ -24,6 +24,12 @@ func RenderJSON(ctx *command.Context, info Info) error {
 // RenderPlain prints key=value formatted diagnostics.
 func RenderPlain(ctx *command.Context, info Info) {
 	ctx.Printer.Printf("hostname=%s\n", info.Hostname)
+	ctx.Printer.Printf("device=%s\n", info.DeviceType)
+	ctx.Printer.Printf("is_termux=%t\n", info.IsTermux)
+	if info.Battery.Available {
+		ctx.Printer.Printf("battery_pct=%d\n", info.Battery.Percent)
+		ctx.Printer.Printf("battery_status=%s\n", info.Battery.Status)
+	}
 	ctx.Printer.Printf("os=%s\n", info.OS)
 	ctx.Printer.Printf("arch=%s\n", info.Arch)
 	ctx.Printer.Printf("cpus=%d\n", info.CPUs)
@@ -60,10 +66,23 @@ func RenderHuman(ctx *command.Context, info Info, opts Options) {
 	// 1. System & Architecture Card
 	sysLines := []string{
 		fmt.Sprintf(" %-16s %s", th.Format(theme.RoleMuted, "Host:", prof), th.Format(theme.RoleInfo, info.Hostname, prof)),
+		fmt.Sprintf(" %-16s %s", th.Format(theme.RoleMuted, "Device:", prof), th.Format(theme.RoleSuccess, info.DeviceType, prof)),
 		fmt.Sprintf(" %-16s %s / %s", th.Format(theme.RoleMuted, "Platform:", prof), th.Format(theme.RoleInfo, info.OS, prof), th.Format(theme.RoleInfo, info.Arch, prof)),
 		fmt.Sprintf(" %-16s %s cores", th.Format(theme.RoleMuted, "CPU:", prof), th.Format(theme.RoleAccent, fmt.Sprintf("%d", info.CPUs), prof)),
 		fmt.Sprintf(" %-16s %s", th.Format(theme.RoleMuted, "Go Runtime:", prof), th.Format(theme.RoleSuccess, info.GoVersion, prof)),
 		fmt.Sprintf(" %-16s %s active", th.Format(theme.RoleMuted, "Goroutines:", prof), th.Format(theme.RoleAccent, fmt.Sprintf("%d", info.Goroutines), prof)),
+	}
+	if info.Battery.Available {
+		batIcon := "🔋"
+		if info.Battery.Status == "Charging" {
+			batIcon = "⚡"
+		}
+		sysLines = append(sysLines, fmt.Sprintf(" %-16s %s %d%% [%s]",
+			th.Format(theme.RoleMuted, "Battery:", prof),
+			batIcon,
+			info.Battery.Percent,
+			info.Battery.Status,
+		))
 	}
 	card1 := renderer.RenderCard("🖥️  System & Hardware", sysLines, w, borderStyle, unicode, prof)
 	for _, l := range card1 {

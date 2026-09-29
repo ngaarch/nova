@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 	"time"
 
 	"nova/internal/command"
@@ -11,34 +13,44 @@ import (
 	"nova/internal/output"
 )
 
+// BatteryInfo holds battery telemetry for mobile and laptop devices.
+type BatteryInfo struct {
+	Available bool   `json:"available"`
+	Percent   int    `json:"percent,omitempty"`
+	Status    string `json:"status,omitempty"`
+}
+
 // Info collects complete system, runtime, and environment telemetry.
 type Info struct {
-	Hostname       string    `json:"hostname"`
-	OS             string    `json:"os"`
-	Arch           string    `json:"arch"`
-	CPUs           int       `json:"cpus"`
-	GoVersion      string    `json:"go_version"`
-	Goroutines     int       `json:"goroutines"`
-	MemoryAlloc    uint64    `json:"memory_alloc"`
-	MemoryTotal    uint64    `json:"memory_total"`
-	MemorySys      uint64    `json:"memory_sys"`
-	HeapAlloc      uint64    `json:"heap_alloc"`
-	NumGC          uint32    `json:"num_gc"`
-	Cwd            string    `json:"cwd"`
-	Disk           DiskSpace `json:"disk"`
-	TermWidth      int       `json:"term_width"`
-	TermHeight     int       `json:"term_height"`
-	TermIsTTY      bool      `json:"term_is_tty"`
-	TermColor      string    `json:"term_color"`
-	TermUnicode    bool      `json:"term_unicode"`
-	ThemeName      string    `json:"theme_name"`
-	IconMode       string    `json:"icon_mode"`
-	GitRepo        bool      `json:"git_repo"`
-	GitBranch      string    `json:"git_branch,omitempty"`
-	GitClean       bool      `json:"git_clean,omitempty"`
-	PathTotalCount int       `json:"path_total_count"`
-	PathValidCount int       `json:"path_valid_count"`
-	PathDirs       []string  `json:"path_dirs,omitempty"`
+	Hostname       string      `json:"hostname"`
+	DeviceType     string      `json:"device_type"`
+	IsTermux       bool        `json:"is_termux"`
+	Battery        BatteryInfo `json:"battery"`
+	OS             string      `json:"os"`
+	Arch           string      `json:"arch"`
+	CPUs           int         `json:"cpus"`
+	GoVersion      string      `json:"go_version"`
+	Goroutines     int         `json:"goroutines"`
+	MemoryAlloc    uint64      `json:"memory_alloc"`
+	MemoryTotal    uint64      `json:"memory_total"`
+	MemorySys      uint64      `json:"memory_sys"`
+	HeapAlloc      uint64      `json:"heap_alloc"`
+	NumGC          uint32      `json:"num_gc"`
+	Cwd            string      `json:"cwd"`
+	Disk           DiskSpace   `json:"disk"`
+	TermWidth      int         `json:"term_width"`
+	TermHeight     int         `json:"term_height"`
+	TermIsTTY      bool        `json:"term_is_tty"`
+	TermColor      string      `json:"term_color"`
+	TermUnicode    bool        `json:"term_unicode"`
+	ThemeName      string      `json:"theme_name"`
+	IconMode       string      `json:"icon_mode"`
+	GitRepo        bool        `json:"git_repo"`
+	GitBranch      string      `json:"git_branch,omitempty"`
+	GitClean       bool        `json:"git_clean,omitempty"`
+	PathTotalCount int         `json:"path_total_count"`
+	PathValidCount int         `json:"path_valid_count"`
+	PathDirs       []string    `json:"path_dirs,omitempty"`
 }
 
 // Command returns the registered Command instance for the sysinfo subcommand.
@@ -117,8 +129,14 @@ func gatherInfo(ctx *command.Context, opts Options) Info {
 		gitClean = len(repoStatus.Statuses) == 0
 	}
 
+	devType, isTermux := detectDeviceType()
+	battery := getBatteryInfo()
+
 	info := Info{
 		Hostname:       hostname,
+		DeviceType:     devType,
+		IsTermux:       isTermux,
+		Battery:        battery,
 		OS:             runtime.GOOS,
 		Arch:           runtime.GOARCH,
 		CPUs:           runtime.NumCPU(),
@@ -150,4 +168,55 @@ func gatherInfo(ctx *command.Context, opts Options) Info {
 	}
 
 	return info
+}
+
+func detectDeviceType() (string, bool) {
+	isTermux := os.Getenv("TERMUX_VERSION") != "" ||
+		strings.Contains(os.Getenv("PREFIX"), "com.termux") ||
+		strings.Contains(os.Getenv("HOME"), "com.termux")
+
+	if isTermux {
+		return "Android (Termux)", true
+	}
+
+	switch runtime.GOOS {
+	case "darwin":
+		if runtime.GOARCH == "arm64" {
+			return "macOS (Apple Silicon)", false
+		}
+		return "macOS (Intel)", false
+	case "windows":
+		return "Windows PC", false
+	case "linux":
+		return "Linux Host", false
+	case "freebsd":
+		return "FreeBSD Host", false
+	default:
+		return runtime.GOOS + "/" + runtime.GOARCH, false
+	}
+}
+
+func getBatteryInfo() BatteryInfo {
+	paths := []string{
+		"/sys/class/power_supply/battery",
+		"/sys/class/power_supply/BAT0",
+		"/sys/class/power_supply/BAT1",
+	}
+	for _, base := range paths {
+		capFile := filepath.Join(base, "capacity")
+		if data, err := os.ReadFile(capFile); err == nil {
+			pct, _ := strconv.Atoi(strings.TrimSpace(string(data)))
+			statFile := filepath.Join(base, "status")
+			status := "Unknown"
+			if sData, err := os.ReadFile(statFile); err == nil {
+				status = strings.TrimSpace(string(sData))
+			}
+			return BatteryInfo{
+				Available: true,
+				Percent:   pct,
+				Status:    status,
+			}
+		}
+	}
+	return BatteryInfo{Available: false}
 }
