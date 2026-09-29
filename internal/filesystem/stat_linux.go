@@ -24,9 +24,9 @@ func populateDetailedPlatformStat(fi os.FileInfo, stat *DetailedStat) {
 	stat.IOBlockSize = int64(s.Blksize)
 	stat.Blocks = int64(s.Blocks)
 
-	stat.AccessTime = time.Unix(s.Atim.Sec, s.Atim.Nsec)
-	stat.ModifyTime = time.Unix(s.Mtim.Sec, s.Mtim.Nsec)
-	stat.ChangeTime = time.Unix(s.Ctim.Sec, s.Ctim.Nsec)
+	stat.AccessTime = time.Unix(int64(s.Atim.Sec), int64(s.Atim.Nsec))
+	stat.ModifyTime = time.Unix(int64(s.Mtim.Sec), int64(s.Mtim.Nsec))
+	stat.ChangeTime = time.Unix(int64(s.Ctim.Sec), int64(s.Ctim.Nsec))
 
 	uid := strconv.Itoa(int(s.Uid))
 	if cached, ok := userCache.Load(uid); ok {
