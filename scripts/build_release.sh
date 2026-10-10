@@ -18,10 +18,10 @@ rm -rf "$DIST_DIR"/*
 PLATFORMS=(
     "linux/amd64"
     "linux/arm64"
+    "linux/arm"
     "darwin/amd64"
     "darwin/arm64"
     "windows/amd64"
-    "windows/arm64"
 )
 
 LDFLAGS="-s -w -X nova/internal/cli.Version=${VERSION} -X nova/internal/cli.GitCommit=${GIT_COMMIT} -X nova/internal/cli.BuildDate=${BUILD_DATE}"
@@ -48,6 +48,13 @@ for PLATFORM in "${PLATFORMS[@]}"; do
         (cd "$DIST_DIR" && zip -q -r "${OUTPUT_NAME}.zip" "$OUTPUT_NAME")
     else
         tar -czf "$DIST_DIR/${OUTPUT_NAME}.tar.gz" -C "$DIST_DIR" "$OUTPUT_NAME"
+    fi
+
+    if [ "$PLATFORM" = "linux/arm64" ]; then
+        cp "$DIST_DIR/${OUTPUT_NAME}.tar.gz" "$DIST_DIR/nova_${VERSION}_android_termux_arm64.tar.gz"
+    fi
+    if [ "$PLATFORM" = "linux/arm" ]; then
+        cp "$DIST_DIR/${OUTPUT_NAME}.tar.gz" "$DIST_DIR/nova_${VERSION}_android_termux_arm.tar.gz"
     fi
 
     rm -rf "$TARGET_DIR"
