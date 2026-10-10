@@ -2,9 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.27+-00ADD8?logo=go)](go.mod)
-[![Status](https://img.shields.io/badge/Release-v2.0.0-success.svg)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/Release-v2.1.0-success.svg)](CHANGELOG.md)
 [![Dependencies](https://img.shields.io/badge/Dependencies-Zero-brightgreen.svg)](go.mod)
-[![Architecture](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](ROADMAP.md)
+[![Architecture](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows%20%7C%20Android%20(Termux)-lightgrey.svg)](ROADMAP.md)
 
 **Nova** is a modern, fast, beautiful, and interactive terminal utility suite in Go. It rebuilds the classic Unix core utilities — `ls`, `cat`, `tree`, `find`, `stat`, `du`, `cp`, `mv`, `rm`, `mkdir`, `grep`, alongside workspace maintenance (`clean`), compression (`archive`), live monitor (`watch`), system diagnostics (`sysinfo`), I/O benchmarks (`bench`), and an interactive dual-pane file explorer — into a unified, zero-dependency binary engineered for 2026 terminal workflows.
 
@@ -94,9 +94,10 @@ FAST · BEAUTIFUL · SIMPLE · POWERFUL · INTERACTIVE · COMPOSABLE · RELIABLE
 ### Pre-Compiled Binaries
 Download the latest release tarball or zip for your operating system and architecture from the [Releases](https://github.com/ngaarch/nova/releases) page:
 
-- **Linux**: `nova_2.0.0_linux_amd64.tar.gz` | `nova_2.0.0_linux_arm64.tar.gz`
-- **macOS**: `nova_2.0.0_darwin_amd64.tar.gz` | `nova_2.0.0_darwin_arm64.tar.gz`
-- **Windows**: `nova_2.0.0_windows_amd64.zip` | `nova_2.0.0_windows_arm64.zip`
+- **Linux**: `nova_2.1.0_linux_amd64.tar.gz` | `nova_2.1.0_linux_arm64.tar.gz`
+- **macOS**: `nova_2.1.0_darwin_arm64.tar.gz` (Apple Silicon) | `nova_2.1.0_darwin_amd64.tar.gz` (Intel)
+- **Windows**: `nova_2.1.0_windows_amd64.zip`
+- **Android (Termux)**: `nova_2.1.0_android_termux_arm64.tar.gz` | `nova_2.1.0_android_termux_arm.tar.gz`
 
 Extract and place the `nova` binary into your system `PATH` (e.g., `/usr/local/bin`).
 

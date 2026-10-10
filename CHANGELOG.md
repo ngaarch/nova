@@ -4,6 +4,32 @@ All notable changes to `nova` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-10-10
+
+### Universal Multi-Device Platform Release (Linux, macOS, Windows, Android/Termux)
+
+### Added
+- **Device & Platform Intelligence (`nova sysinfo`) [Phase 33]**:
+  - Automatic device environment recognition:
+    - **Linux**: Linux Desktop / Server (`linux/amd64`, `linux/arm64`).
+    - **macOS**: Mac Apple Silicon (`darwin/arm64`) and Mac Intel (`darwin/amd64`).
+    - **Windows**: Windows PC (`windows/amd64`).
+    - **Android (Termux)**: Android phone/tablet in Termux environment with `$TERMUX_VERSION` and `$PREFIX` detection.
+  - Hardware battery status & capacity telemetry (`🔋 85% [Charging]`, `⚡ 100% [Full]`) on mobile and laptop devices.
+  - Multi-architecture signed block counts and 32-bit timestamp compatibility across Linux ARM, 386, and BSD.
+
+- **Universal Multi-Device Release Packaging [Phase 34]**:
+  - Pre-compiled zero-dependency binary distributions:
+    - `nova_2.1.0_linux_amd64.tar.gz` (Standard Linux x86_64)
+    - `nova_2.1.0_darwin_arm64.tar.gz` (Apple Silicon M1/M2/M3/M4)
+    - `nova_2.1.0_darwin_amd64.tar.gz` (Intel Mac)
+    - `nova_2.1.0_windows_amd64.zip` (Windows 64-bit)
+    - `nova_2.1.0_android_termux_arm64.tar.gz` (Android 64-bit Termux)
+    - `nova_2.1.0_android_termux_arm.tar.gz` (Android 32-bit Termux)
+  - Cryptographic verification via `SHA256SUMS.txt`.
+
+---
+
 ## [2.0.0] - 2026-09-28
 
 ### Milestone 2.0 Generation Release

@@ -37,6 +37,8 @@ PHASE 29 SSL/TLS Validator & JWT Decoder (`cert`, `jwt`)    [COMPLETED]
 PHASE 30 Developer Secret & Entropy Scanner (`scan`)        [COMPLETED]
 PHASE 31 Multi-Core Hardware Stress & Benchmark (`stress`)  [COMPLETED]
 PHASE 32 Terminal Color Studio & WCAG Inspector (`color`)   [COMPLETED]
+PHASE 33 Device & Platform Intelligence (`sysinfo`)         [COMPLETED]
+PHASE 34 Universal Multi-Device Packaging (Linux/Mac/Win/Android) [COMPLETED]
 ```
 
 ---
@@ -678,3 +680,38 @@ PHASE 32 Terminal Color Studio & WCAG Inspector (`color`)   [COMPLETED]
 **Exit Gate:**
 - 100% test pass across all 52 packages.
 - Release version `2.0.0` (Milestone 2.0 Generation) verified and deployed.
+
+---
+
+## Phase 33 — Device & Platform Intelligence (`sysinfo`)
+
+**Goal:** Detect execution environment (Linux Desktop/Server, macOS Apple Silicon / Intel, Windows PC, Android Termux) and provide hardware battery and power telemetry.
+
+**Tasks:**
+- Implement dynamic device environment recognition in `nova sysinfo`:
+  - Termux / Android environment awareness via `$TERMUX_VERSION` and `$PREFIX`.
+  - Apple Silicon vs Intel Mac differentiation.
+  - Hardware battery capacity (%) and charging status (`Charging`, `Discharging`, `Full`).
+  - 32-bit architecture timestamp casting and signed block counter normalization.
+
+**Exit Gate:**
+- 100% test pass on Linux, macOS, Windows, and Android Termux targets.
+
+---
+
+## Phase 34 — Universal Multi-Device Packaging (Linux, macOS, Windows, Android/Termux)
+
+**Goal:** Automate cross-platform release builds delivering zero-dependency standalone binaries for all requested device environments.
+
+**Tasks:**
+- Configure matrix builder `scripts/build_release.sh` targeting:
+  - Linux: `linux/amd64`
+  - macOS: `darwin/arm64` and `darwin/amd64`
+  - Windows: `windows/amd64` (`nova.exe`)
+  - Android (Termux): `linux/arm64` and `linux/arm` (32-bit)
+- Automated SHA-256 verification generation (`SHA256SUMS.txt`).
+
+**Exit Gate:**
+- All 6 platform distributions compiled and packaged in `dist/`.
+- Release version `2.1.0` verified and deployed.
+
